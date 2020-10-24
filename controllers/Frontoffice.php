@@ -41,7 +41,6 @@ class Frontoffice extends CI_Controller {
 		$this->load->library('form_validation');
 		$this->load->library('enkripsi');
 		$this->load->library('viewfrommyframework');
-
 	}
 	
 	public function index()
@@ -49,7 +48,63 @@ class Frontoffice extends CI_Controller {
 		$this->load->view('loginpage');
 	}
 
+	//===========================================TAMBAHAN FUNGSI API BARU UNTUK MENGAKSES ALAMAT WEB=======================================
+	public function akses_alamat_web_untuk_disajikan_secara_mentah($token_terenkapsulasi=NULL){
+		//echo "OK BRO akses_alamat_web_untuk_disajikan_secara_mentah";
+		if($this->enkripsi->dekapsulasiData($token_terenkapsulasi)=='andisinra'){
+			$Recordset=$this->user_defined_query_controller_as_array($query="select alamat,pemilik from alamat_web order by idalamat desc",$token='andisinra');
+			$buffer=array();
+			foreach($Recordset as $key=>$unit){
+				foreach($unit as $subkey=>$isi){
+					is_string($subkey)?$buffer[$key][$subkey]=$isi:NULL;
+				}
+			}
+		}
+		$paket_enkrip=$this->enkripsi->enkapsulasiData($buffer);
+		echo $paket_enkrip;
+	}
+
+	public function read_alamat_web_agenda_untuk_teruskan_surat_frontoffice($token_terenkapsulasi){
+		if($this->enkripsi->dekapsulasiData($token_terenkapsulasi)=='andisinra'){
+			$Recordset=$this->user_defined_query_controller_as_array($query="select alamat,pemilik from alamat_web",$token='andisinra');
+			//print_r($Recordset);
+			
+			echo "
+			<label>Silahkan pilih target pengiriman:</label>
+			<select name=okbro id=select_alamat class=\"form-control\" style=\"width:70%;min-width:250px;\">
+			<option value=\"".$this->config->item('bank_data')."/index.php/Frontoffice/coba_kirim_new\" style=\"color:red;\">Klik disini untuk memilih alamat tujuan</option>
+			";
+			foreach($Recordset as $key=>$unit){
+				echo "<option value=".$unit['alamat']." >".$unit['pemilik']."</option>";
+			}
+			echo "</select>
+			";
+
+			echo "
+				<br>
+				<input id=\"tes_x\" class='form-control' type=\"text\" id='tes_x'>
+				<button class=\"btn btn-success shadow-sm kotak\" id=\"xxxx\" style=\"float:left;margin-bottom:0px;\"><i class='fas fa-eye fa-sm text-white-100'></i> Pilih alamat penerusan</button>
+				<script>      
+				$(document).ready(function(){
+					$(\"#xxxx\").click(function(){
+					var selectedVal = $(\"#select_alamat option:selected\").val();
+					var select_form=selectedVal+'/Frontoffice/coba_kirim_new';
+					alert(selectedVal);
+					});
+					});
+					
+				</script> 
+			";
+		}
+		
+	}
+	//===========================================END TAMBAHAN FUNGSI API BARU UNTUK MENGAKSES ALAMAT WEB=================================== 
+
 	//===========================================RENCANA PENAMBAHAN UNTUK API LOG PERJALANAN SURAT FRONTOFFICE=============================
+	public function tes0001($data=NULL){
+		echo "OK BRO tes0001";
+	}
+	
 	public function insersi_ke_tabel_log_surat_frontoffice($data=NULL){
 		if($data==NULL){
 			if(isset($_POST['data_status_balik'])){
@@ -66,6 +121,7 @@ class Frontoffice extends CI_Controller {
 			$kiriman=array();
 			$kiriman=$data_dekrip;
 			$log=$this->general_insertion_controller_no_alert($kiriman,'log_surat_masuk');
+			//echo $log;
 		}
 	}
 
@@ -10508,15 +10564,15 @@ class Frontoffice extends CI_Controller {
 			echo "
 				<!-- Script untuk pemanggilan ajax -->
 				<script>      
-						$(document).ready(function(){
-							$(\"#select_alamat\").click(function(){
-							var selectedVal = $(\"#select_alamat option:selected\").val();
-							var select_form=selectedVal+'/Frontoffice/perantara2';
-							$('#kirim_terusan_agenda').attr('action', select_form);
-							});
-							});
-							
-						</script> 
+				$(document).ready(function(){
+					$(\"#select_alamat\").click(function(){
+					var selectedVal = $(\"#select_alamat option:selected\").val();
+					var select_form=selectedVal+'/Frontoffice/perantara2';
+					$('#kirim_terusan_agenda').attr('action', select_form);
+					});
+					});
+					
+				</script> 
 			";
 		}
 		
