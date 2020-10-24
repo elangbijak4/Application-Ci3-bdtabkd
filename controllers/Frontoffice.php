@@ -102,6 +102,7 @@ class Frontoffice extends CI_Controller {
 					$.post('".$this->config->item('link_sekretariat').'index.php/Frontoffice/verifikasi_new/'."',{key:\"$key_asal\",data:\"$isi_key\", alamat:selectedVal },
 					function(data_refresh,status_refresh){
 						loading.fadeOut();
+						//alert(selectedVal);
 						tampilkan.html(data_refresh);
 						tampilkan.fadeIn(2000);
 					});
