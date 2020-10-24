@@ -64,15 +64,21 @@ class Frontoffice extends CI_Controller {
 		echo $paket_enkrip;
 	}
 
+	public function tes0002(){
+		echo "OK BRO tes selectedval bankdata";
+	}
+
 	public function read_alamat_web_agenda_untuk_teruskan_surat_frontoffice($token_terenkapsulasi){
 		if($this->enkripsi->dekapsulasiData($token_terenkapsulasi)=='andisinra'){
+			$key_asal=$_POST['key'];
+			$isi_key=$_POST['data'];
 			$Recordset=$this->user_defined_query_controller_as_array($query="select alamat,pemilik from alamat_web",$token='andisinra');
 			//print_r($Recordset);
 			
 			echo "
 			<label>Silahkan pilih target pengiriman:</label>
-			<select name=okbro id=select_alamat class=\"form-control\" style=\"width:70%;min-width:250px;\">
-			<option value=\"".$this->config->item('bank_data')."/index.php/Frontoffice/coba_kirim_new\" style=\"color:red;\">Klik disini untuk memilih alamat tujuan</option>
+			<select name=okbro id=\"select_alamat$isi_key\" class=\"form-control\" style=\"width:70%;min-width:250px;\">
+			<option value=\"".$this->config->item('bank_data')."/index.php\" style=\"color:red;\">Klik disini untuk memilih alamat tujuan</option>
 			";
 			foreach($Recordset as $key=>$unit){
 				echo "<option value=".$unit['alamat']." >".$unit['pemilik']."</option>";
@@ -82,14 +88,23 @@ class Frontoffice extends CI_Controller {
 
 			echo "
 				<br>
-				<input id=\"tes_x\" class='form-control' type=\"text\" id='tes_x'>
-				<button class=\"btn btn-success shadow-sm kotak\" id=\"xxxx\" style=\"float:left;margin-bottom:0px;\"><i class='fas fa-eye fa-sm text-white-100'></i> Pilih alamat penerusan</button>
+				<button class=\"btn btn-success shadow-sm kotak\" id=\"pilih_alamat$isi_key\" style=\"width:100%;margin-bottom:0px;\"><i class='fas fa-paper-plane fa-sm text-white-100'></i> Pilih alamat penerusan</button>
 				<script>      
 				$(document).ready(function(){
-					$(\"#xxxx\").click(function(){
-					var selectedVal = $(\"#select_alamat option:selected\").val();
-					var select_form=selectedVal+'/Frontoffice/coba_kirim_new';
-					alert(selectedVal);
+					$(\"#pilih_alamat$isi_key\").click(function(){
+					var selectedVal = $(\"#select_alamat$isi_key option:selected\").val();
+					//var select_form=selectedVal+'/Frontoffice/coba_kirim_new';
+					//alert(selectedVal);
+					var loading = $(\"#pra_verifikasi\");
+					var tampilkan = $(\"#penampil_verifikasi\");
+					tampilkan.hide();
+					loading.fadeIn(); 
+					$.post('".$this->config->item('link_sekretariat').'index.php/Frontoffice/verifikasi_new/'."',{key:\"$key_asal\",data:\"$isi_key\", alamat:selectedVal },
+					function(data_refresh,status_refresh){
+						loading.fadeOut();
+						tampilkan.html(data_refresh);
+						tampilkan.fadeIn(2000);
+					});
 					});
 					});
 					
@@ -97,6 +112,10 @@ class Frontoffice extends CI_Controller {
 			";
 		}
 		
+	}
+
+	public function coba_kirim_new(){
+		echo "OK BRO coba_kirim_new bankdata";
 	}
 	//===========================================END TAMBAHAN FUNGSI API BARU UNTUK MENGAKSES ALAMAT WEB=================================== 
 

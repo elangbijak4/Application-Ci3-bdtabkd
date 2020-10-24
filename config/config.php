@@ -27,9 +27,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'https://localhost/admin_bankdata';
 $config['base_domain']='https://localhost';
-$config['bank_data']='https://localhost/admin_bankdata';
+$config['base_url'] =$config['base_domain'].'/admin_bankdata';
+$config['bank_data']=$config['base_domain'].'/admin_bankdata';
+$config['nama_opd']='BKD';
+$config['nama_landingpage']=$config['base_domain'].'/sistrabkdsulsel-ver02';
+$config['nama_bidang']='Front Office BKD Provinsi Sulawesi Selatan';
+$config['nama_bidang_pendek']='Front Office';
+$config['link_frontoffice']=$config['base_domain'].'/front-office-depan/';
+$config['link_sekretariat']=$config['base_domain'].'/sekretariat-bkd/';
+$config['situs_induk']='https://bkd.sulselprov.go.id';
+
+$config['link_ruangkaban']=$config['base_domain'].'/bpsdm-frontoffice';
 /*
 |--------------------------------------------------------------------------
 | Index File
