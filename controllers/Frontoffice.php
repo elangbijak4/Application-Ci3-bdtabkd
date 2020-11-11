@@ -49,6 +49,234 @@ class Frontoffice extends CI_Controller {
 		$this->load->view('loginpage');
 	}
 
+	//===========================================#0001======================================================================================
+	public function cek_apakah_surat_sudah_dibalas(){
+		$kolom_rujukan['nama_kolom']='idsurat_masuk_dibalas';
+		$kolom_rujukan['nilai']=$_POST['data'];
+		$kolom_target='idsurat_masuk_dibalas';
+		$nilai_ada_atau_tidak=array();
+		$nilai_ada_atau_tidak=$this->model_frommyframework->pembaca_nilai_kolom_tertentu("surat_arsip_frontoffice_balasan",$kolom_rujukan,$kolom_target);
+		//Tambahkan dengan nama-nama foto baru:
+		if(isset($nilai_ada_atau_tidak[0])&&($nilai_ada_atau_tidak[0]!==NULL)) {
+			echo "OK";
+		}else{
+			echo "NOT YET";
+		}
+	}
+
+	//===========================================#end0001===================================================================================
+
+	//===========================================TAMBAHAN UNTUK BALAS SURAT TAMU PEGAWAI====================================================
+	public function unggah_surat_frontoffice_balasan_ok(){
+		//$isi=$this->enkripsi->dekapsulasiData($_POST['isi']);
+		echo "OK BRO unggah_surat_frontoffice_balasan_ok";
+	}
+	public function unggah_surat_frontoffice_balasan(){
+		//$this->header_lengkap_bootstrap_controller();
+		$isi=$this->enkripsi->dekapsulasiData($_POST['isi']);
+		$this->session->set_userdata('url_balik',$_POST['url_balik']);
+		$judul="<span style=\"font-size:20px;font-weight:bold;\">UNGGAH SURAT BALASAN DAN BERKAS PENDUKUNG</span>";
+		$tabel="surat_arsip_frontoffice_balasan";
+		$coba=array();
+		$id='idsurat_balasan';
+		$aksi='tambah';
+		if (!($aksi=="cari") and !($aksi=="tampil_semua")) $coba=$this->pengisi_komponen_controller($id,$tabel,$aksi);
+		//deskripsi $komponen=array($type 0,$nama_komponen 1,$class 2,$id 3,$atribut 4,$event 5,$label 6,$nilai_awal_atau_nilai_combo 7. $selected 8)
+		$coba=$this->pengisi_awal_combo ($id,$tabel,$coba);
+		//deskripsi combo_database: $type='combo_database',$nama_komponen,$class,$id,$atribut,$kolom,$tabel,$selected
+
+		//reset form sebelum dibuka:
+		foreach($coba as $key=>$k){
+			$coba[$key][7]='';
+		}
+
+		
+		$coba[1][0]='text';
+		$coba[1][7]=$isi['idsurat_asal'];
+		$coba[1][4]='readonly';
+
+		$coba[2][0]='text';
+		$coba[3][0]='text';
+
+		$coba[4][0]='text';
+		$coba[4][7]=$isi['nip'];
+		$coba[4][4]='readonly';
+
+		$coba[5][0]='text';
+		$coba[5][7]=$isi['no_registrasi_tamu'];
+		$coba[5][4]='readonly';
+
+		$coba[6][6]='Satker atau OPD yang Membalas Surat';
+		$coba[6][0]='combo_database';
+		$coba[6][7]=array("nama_satker","nama_satker",'satuan_kerja'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[6][8]=$this->config->item('nama_opd_asli');
+		
+		$coba[7][6]='Bidang atau Bagian yang Membalas Surat';
+		$coba[7][0]='combo_database';
+		$coba[7][7]=array("nama_bidang","nama_bidang",'bidang'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[7][8]='Yang Lain (Others)';
+
+		$coba[8][6]='Sub-Bidang atau Sub-Bagian yang Membalas Surat';
+		$coba[8][0]='text';
+
+		$coba[9][0]='hidden';
+		$coba[9][7]=implode("-",array (date("d/m/Y"),date("H:i:s"),mt_rand (1000,9999),microtime()));
+
+		$coba[10][0]='file';
+		$coba[11][0]='file';
+
+		$coba[10][6]='<span style="font-size:20px;color:red;font-weight:bold;">Unggah Surat Balasan</span>';
+		$coba[11][6]='<span style="font-size:20px;color:red;font-weight:bold;">Unggah Berkas Pendukung</span>';
+
+		//Kosong karena pengisian di sisi bankdata yang menerima file, bukan di sisi bidang.
+		$coba[12][0]='hidden';
+		$coba[13][0]='hidden';
+		
+		$coba[14][0]='area';
+		$coba[14][4]="rows=\"10\" placeholder=\"Keterangan tentang surat balasan ini\"";
+
+		$coba[15][0]='hidden';
+		$coba[15][7]='balasan';
+		
+		//hanya diisi saat surat diterima oleh bankdata
+		$coba[16][0]='hidden';
+		$coba[16][7]='';
+		
+		//hanya diisi saat tamu atau pegawai membuka surat balasan
+		$coba[17][0]='hidden';
+		$coba[17][7]='';
+
+		//$coba[18][0]='hidden';
+		//$coba[18][7]=$this->config->item('nama_bidang_pendek');
+
+		$coba[18][0]='hidden';
+		$coba[18][7]=$isi['digest_signature'];
+
+		//INI BELUM LANG DISESUAIKAN
+		$komponen=$coba;
+		//$atribut_form='';
+		$array_option='';
+		$atribut_table=array('table'=>"class=\"table table-condensed\"",'tr'=>"",'td'=>"",'th'=>"");
+		//deskripsi untuk tombol ke-i, $tombol[$i]=array($type 0,$nama_komponen 1,$class 2,$id 3,$atribut 4,$event 5,$label 6,$nilai_awal 7)
+		//$tombol[0]=array('submit','submit','btn btn-primary','submit','','','','Submit','');
+
+		//Kalau menggunakan submit_multi jangan lupa menggunakan atribut form ini.
+		$target_action="Frontoffice/frontoffice_index_balasan_baru/";
+		$atribut_form=" id=\"form_unggah_berkas\" method=\"POST\" enctype=\"multipart/form-data\" action=\"".site_url($target_action)."\" ";
+		
+		$tombol[0]=array('submit_multi_3','submit_nama_komponen_frontoffice','btn btn-primary','id-baru-frontoffice','',array(site_url('/Frontoffice/terima_arsip_surat_keluar_TIDAK_DIGUNAKAN'),$this->config->item('bank_data').'/index.php/Frontoffice/terima_arsip_surat_keluar_frontoffice_TIDAK DIGUNAKAN'),'','Unggah','');
+		$tombol[1]=array('reset','reset','btn btn-warning','reset','','','','Reset','');
+		//$tombol[0]=array('button_ajax_get_CI','button_ajax_get_CI','btn btn-info','button_ajax_get_CI','','','','Kirim','');
+		$value_selected_combo='';
+		$submenu='submenu';
+		$aksi='tambah';
+		$perekam_id_untuk_button_ajax='';
+		$class='form-control';
+		//$this->form_general_2_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control');
+		$this->form_general_2_vertikal_non_iframe_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control',$target_ajax='',$data_ajax=NULL);
+		
+	}
+
+	public function frontoffice_index_balasan_baru()
+	{
+		/*
+		$user = $this->session->userdata('user_bankdata');
+        $str = $user['email'].$user['username']."1@@@@@!andisinra";
+        $str = hash("sha256", $str );
+        $hash=$this->session->userdata('hash');
+
+		if(($user!==FALSE)&&($str==$hash)){
+		*/
+			if(isset($_POST['data_nama'])){
+				$data_post=array();
+				$directory_relatif_file_upload='./public/arsip_unggah_frontoffice_balasan/';	
+				$upload=array();
+				$upload1=upload('nama_file_surat', $folder=$directory_relatif_file_upload, $types="bbc,doc,pdf,jpeg,gif,png,docs,docx,xls,xlsx,ppt,pptx,txt,sql,csv,xml,json,rar,zip,bmp,jpg,htm,html");
+				$upload2=upload('nama_file_berkas', $folder=$directory_relatif_file_upload, $types="bbc,doc,pdf,jpeg,gif,png,docs,docx,xls,xlsx,ppt,pptx,txt,sql,csv,xml,json,rar,zip,bmp,jpg,htm,html");
+				
+				if($upload1[0] || $upload2[0]){
+					//$nama_file_setelah_unggah=array('nama_file_surat' => $upload1, 'nama_file_berkas' => $upload2);
+					$data_nama_masuk=$this->enkripsi->dekapsulasiData($_POST['data_nama']);
+					$data_post=pengambil_data_post_get($data_nama_masuk,$directory_relatif_file_upload);
+					//catatan: walaupun $data_post[0] sebagai idsurat_masuk sudah terisi default karena sifat browser yang menchas data input
+					//akan tetapi insersi tidak melibatkan field idsurat_masuk atau $data_post[0] pada core fungsi general_insertion_controller
+					//jadi biarkan saja demikian.
+
+					//print_r($data_post);echo "<br>";
+					//BISMILLAH:
+					//pindahkan isi $data_post ke $kiriman:
+					$kiriman=array();
+					foreach($data_post as $key=>$k){
+						if($key=='timestamp_masuk'){
+							array_push($kiriman,implode("-",array (date("d/m/Y"),date("H:i:s"),mt_rand (1000,9999),microtime())));
+						}else if($key=='posisi_surat_terakhir'){
+							array_push($kiriman,"Front Office BKD");
+						}else{
+							array_push($kiriman,$k['nilai']);
+						}
+					}
+					$kiriman[10]=$upload1[0];
+					$kiriman[11]=$upload2[0];
+					if($kiriman[10]) {$kiriman[12]=$directory_relatif_file_upload.$upload1[0];}else{$kiriman[12]=NULL;}
+					if($kiriman[11]) {$kiriman[13]=$directory_relatif_file_upload.$upload2[0];}else{$kiriman[13]=NULL;}
+
+					/*
+					//Tanda tangan sebelum ada idsurat_masuk dalam basisdata, tapi buat nanti tand atangan dengan cara memeriksa ulang di basisdata setelah abru saja terjadi insersi
+					//agar diketahui idsurat_masuk, untuk yang ini hanya percobaan saja sementara.
+					//signatur diluar kolom id, simple_signature, digest_signature, diluar kolom timestamp selain timestamp_masuk, dispose, keterangan, status_surat.
+					$persiapan_signature=$kiriman[1].$kiriman[2].$kiriman[3].$kiriman[4].$kiriman[5].$kiriman[6].$kiriman[7].$kiriman[8].$kiriman[9].$kiriman[10].$kiriman[11].$kiriman[12].$kiriman[13].$kiriman[14];
+					$signature=$this->enkripsi->simplesignature_just_hashing($persiapan_signature);
+					$data_post=array_merge($data_post,array('simple_signature'=>array('nilai'=>$signature,'file'=>NULL)));
+					$kiriman[29]=hash('ripemd160',$signature);
+					*/
+
+					//print_r($kiriman);
+					//print_r($data_post);
+					$tabel='surat_arsip_frontoffice_balasan';
+					$hasil_insersi_surat_berkas=$this->general_insertion_controller($kiriman,$tabel);
+					//print_r($kiriman);
+					//Persiapan notifikasi
+					/*
+					if($hasil_insersi_surat_berkas){
+						$tabel_notifikasi='tbnotifikasi';
+						$notifikasi=array();
+						$notifikasi[1]=$data_post['pengirim']['nilai'];
+						$notifikasi[2]=$kiriman[29];
+						$notifikasi[3]='masuk';
+						$notifikasi[4]=$data_post['timestamp_masuk']['nilai'];
+						$notifikasi[5]='';
+						$this->general_insertion_controller($notifikasi,$tabel_notifikasi);
+					}*/
+				}
+				
+				/*
+				//Penetapan lokasi, tanggal dan tertanda frontoffice untuk bagian bawah nota unggah:
+				$date_note=array(' ','Makassar ',date("d/m/Y"),'Tertanda:','Frontoffice Sistem Terintegrasi BKD Provinsi Sulawesi Selatan');
+				array_push($upload,$upload1);
+				array_push($upload,$upload2);
+				$data_upload['data_upload']=$upload;
+				$data_upload['src']="Frontoffice/pdf/".$this->enkripsi->strToHex(serialize($data_post))."/".$this->enkripsi->strToHex(serialize($date_note));
+				*/
+				//print_r($data_upload);
+				//$this->load->view('index',$data_upload);
+				$url_balik=$this->enkripsi->dekapsulasiData($this->session->userdata('url_balik'));
+				redirect($url_balik."/sukses_balasan_surat_frontoffice");
+			} else {
+				$url_balik=$this->enkripsi->dekapsulasiData($this->session->userdata('url_balik'));
+				redirect($url_balik."/gagal_balasan_surat_frontoffice");
+				//$data_upload['data_upload']=NULL;
+				//$this->load->view('index',$data_upload);
+			}
+		/*
+		}else {
+			$this->session->set_userdata('percobaan_login','gagal');
+			//redirect( site_url('login/login') );
+			$this->load->view("loginpage");
+		}
+		*/
+	}
+	//===========================================END TAMBAHAN UNTUK BALAS SURAT TAMU PEGAWAI================================================
+
 	//===========================================TAMBAHAN UNTUK MELAKUKAN SEARCH SURAT DI AKUN TAMU========================================
 	public function tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun($table='log_surat_masuk',$nama_kolom_id='idlog_masuk',$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$idtamu=NULL){
 		//echo "INI NILAI LIMIT: ".$limit;
@@ -1310,7 +1538,7 @@ class Frontoffice extends CI_Controller {
 				$kiriman=array();
 				$kiriman=$data_dekrip;
 				$log=$this->general_insertion_controller_no_alert($kiriman,'log_surat_masuk');
-				//echo $log;
+				//echo "ok ini 1";
 			}else{
 				alert("Tidak ada data yang diterima");
 			}
@@ -1319,7 +1547,7 @@ class Frontoffice extends CI_Controller {
 			$kiriman=array();
 			$kiriman=$data_dekrip;
 			$log=$this->general_insertion_controller_no_alert($kiriman,'log_surat_masuk');
-			//echo $log;
+			//echo "ok ini 2";
 		}
 	}
 
@@ -2041,6 +2269,7 @@ class Frontoffice extends CI_Controller {
 
 	   $kiriman[19]=$data[$kolom_target];
 	   $kiriman[20]='dipending';
+	   $kiriman[0]=NULL;
 	   
 	   //Kirim balik untuk di log verifikasi_new() lewat call ajax dari verifikasi_new()
 	   //array_unshift($kiriman,NULL); ga usah di sekretariat karena format surat_masuk sudah sesuai format tabel log_surat_masuk di bankdata
@@ -2281,6 +2510,7 @@ class Frontoffice extends CI_Controller {
 
 	   $kiriman[19]=$data[$kolom_target];
 	   $kiriman[20]='ditolak';
+	   $kiriman[0]=NULL;
 	   
 	   //Kirim balik untuk di log verifikasi_new() lewat call ajax dari verifikasi_new()
 	   //array_unshift($kiriman,NULL); ga usah di sekretariat karena format surat_masuk sudah sesuai format tabel log_surat_masuk di bankdata
@@ -2327,6 +2557,7 @@ class Frontoffice extends CI_Controller {
    
 		   $kiriman[22]=$data[$kolom_target];
 		   $kiriman[20]='dibaca';
+		   $kiriman[0]=NULL;
 		   
 		   //Kirim balik untuk di log verifikasi_new() lewat call ajax dari verifikasi_new()
 		   //array_unshift($kiriman,NULL); ga usah di sekretariat karena format surat_masuk sudah sesuai format tabel log_surat_masuk di bankdata
@@ -2480,6 +2711,7 @@ class Frontoffice extends CI_Controller {
 	   $kiriman=unserialize($this->session->userdata('kiriman_surat'));//$user = $this->session->userdata('user');
 	   $kiriman[20]='diteruskan';
 	   $kiriman[24]=$data[$kolom_target];
+	   $kiriman[0]=NULL;
 	   
 	   //Kirim balik untuk di log verifikasi_new() lewat call ajax dari verifikasi_new()
 	   //array_unshift($kiriman,NULL); ga usah di sekretariat karena format surat_masuk sudah sesuai format tabel log_surat_masuk di bankdata

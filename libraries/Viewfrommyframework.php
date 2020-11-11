@@ -176,10 +176,17 @@ class Viewfrommyframework {
                                     echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">SELESAI</span>";
                                     if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
                                     if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+                                } else if($isi[$k]=='dibalas'){
+                                    $warna_badge='success';
+                                    $time=explode('-',$isi['timestamp_dikembalikan']);
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">DIBALAS</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else {
                                     $warna_badge='info';
                                     $time=explode('-',$isi['timestamp_masuk']);
                                     echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span>";
+                                    if(isset($time[0])&&($time[0]!='')&&($isi[$k]!='masuk')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
                                     if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 }
                                 echo "</td>";
@@ -684,10 +691,17 @@ class Viewfrommyframework {
                                     echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">SELESAI</span>";
                                     if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
                                     if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+                                } else if($isi[$k]=='dibalas'){
+                                    $warna_badge='success';
+                                    $time=explode('-',$isi['timestamp_dikembalikan']);
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">DIBALAS</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else {
                                     $warna_badge='info';
                                     $time=explode('-',$isi['timestamp_masuk']);
                                     echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span>";
+                                    if(isset($time[0])&&($time[0]!='')&&($isi[$k]!='masuk')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
                                     if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 }
                                 echo "</td>";
@@ -1132,6 +1146,26 @@ class Viewfrommyframework {
                                 if($k=='timestamp_masuk'){
                                     $temporer=explode('-',$isi[$k]);
                                     echo "<td align=left valign=top>".$temporer[0]."</td>";
+                                } else if(($k=='keterangan')&&(isset($isi['keterangan']))&&($isi['keterangan']!='')) {
+                                    echo "<td align=left valign=top>
+                                    <button class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm kotak\"  style=\"width:100px; height:100%; margin-top:20px; margin-bottom:0px; margin-top:5px;\" id=\"lihat_keterangan$keyisi\" data-toggle=\"modal\" data-target=\"#modal_verifikasi\">Lihat Keterangan</button>
+                                    </td>
+                                    <script>
+                                    $(document).ready(function(){
+                                        $(\"#lihat_keterangan$keyisi\").click(function(){
+                                            var loading = $(\"#pra_verifikasi\");
+                                            var tampilkan = $(\"#penampil_verifikasi\");
+                                            //alert('lihat keterangan');
+                                            tampilkan.hide();
+                                            loading.fadeIn(); 
+                                            loading.fadeOut();
+                                            tampilkan.html('<div align=\"left\" style=\"margin-left:20px;\"><h4>Keterangan sebelumnya:</h4><br>".$isi['keterangan']."</div>');
+                                            tampilkan.fadeIn(2000);
+                                            
+                                        });
+                                    });
+                                    </script>
+                                    ";
                                 } else {
                                     echo "<td align=left valign=top>".$isi[$k]."</td>";
                                 }
@@ -1145,26 +1179,45 @@ class Viewfrommyframework {
                                 if($isi[$k]=='dibaca'){
                                     $warna_badge='success';
                                     $time=explode('-',$isi['timestamp_baca']);
-                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span><br><span class=\"badge badge-$warna_badge\">".$time[0]."</span>";
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span><br>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else if($isi[$k]=='ditolak'){
                                     $warna_badge='danger';
                                     $time=explode('-',$isi['timestamp_tolak']);
-                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span><br><span class=\"badge badge-$warna_badge\">".$time[0]."</span>";
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else if($isi[$k]=='dipending'){
                                     $warna_badge='warning';
                                     $time=explode('-',$isi['timestamp_dipending']);
-                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span><br><span class=\"badge badge-$warna_badge\">".$time[0]."</span>";
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else if($isi[$k]=='diteruskan'){
                                     $warna_badge='primary';
                                     $time=explode('-',$isi['timestamp_diteruskan']);
-                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span><br><span class=\"badge badge-$warna_badge\">".$time[0]."</span>";
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else if($isi[$k]=='selesai'){
                                     $warna_badge='success';
                                     $time=explode('-',$isi['timestamp_dikembalikan']);
-                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">SELESAI</span><br><span class=\"badge badge-$warna_badge\">".$time[0]."</span>";
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">SELESAI</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+                                } else if($isi[$k]=='dibalas'){
+                                    $warna_badge='success';
+                                    $time=explode('-',$isi['timestamp_dikembalikan']);
+                                    echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">DIBALAS</span>";
+                                    if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 } else {
                                     $warna_badge='info';
+                                    $time=explode('-',$isi['timestamp_masuk']);
                                     echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$isi[$k]."</span>";
+                                    if(isset($time[0])&&($time[0]!='')&&($isi[$k]!='masuk')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+                                    if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
                                 }
                                 echo "</td>";
                             }
@@ -4961,6 +5014,72 @@ class Viewfrommyframework {
                     ";
                     //$this->CI->session->set_userdata('teks_modal',NULL);
             break;
+            case ("submit_multi_3"):
+                echo "<input type='button' class='$class' name='$nama_komponen' id='$id'  onclick='javascript: return SubmitForm()' data-toggle='modal' data-target='#myModal_submit' value='".$value."'>";
+                //$this->CI->session->userdata('teks_modal')!==NULL?$teks_modal=$this->CI->session->userdata('teks_modal'):$teks_modal='';
+                echo "
+                    <!-- Modal Submit -->
+                    <div class=\"modal fade\" id=\"myModal_submit\" role=\"dialog\" style=\"z-index:10000000;\">
+                        <div class=\"modal-dialog modal-sm\">
+                        
+                        <!-- Modal content-->
+                        <div class=\"modal-content\" ".$this->CI->config->item('style_modal_admin').">
+                            <div class=\"modal-body\">
+                            <center>
+                            <div id='pra_submit' style='width:65%;' align='center' >
+                            <div>$label</div>
+                            <div class=\"progress\" style=\"margin-top:50px; height:20px\">
+                                <div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" aria-valuenow=\"90\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width:100%\">
+                                mohon tunggu...
+                                </div>
+                            </div>
+                            </div>
+                            </center>
+                            <div id=penampil1_submit align=\"center\" style='width:100%;'></div>
+                            </div>
+                            <div class=\"modal-footer\">
+                            <!--<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" >Close</button>-->
+                            </div>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    ";
+                
+                    echo "
+                        <script language=javascript>
+                        function SubmitForm()
+                        {";
+                                echo "document.forms['form_unggah_berkas'].target='_top';";
+                                echo "document.forms['form_unggah_berkas'].submit();";
+
+                                foreach($event as $key=>$unit){
+                                    echo "document.forms['form_unggah_berkas'].action='$unit';";
+                                    echo "document.forms['form_unggah_berkas'].target='frame_result$key';";
+                                    echo "document.forms['form_unggah_berkas'].submit();";
+                                }
+                    echo "
+                        }
+                        </script>
+            
+                    ";
+            
+                    echo "
+                    <div style='display:none;'>";
+                        echo "<div class='iframe_container'>";
+                        echo "<iframe name='frame_result' width='350px' height='100px' frameborder='0'></iframe>";
+                        echo "</div>";
+
+                        foreach($event as $key=>$unit){
+                            echo "<div class='iframe_container'>";
+                            echo "<iframe name='frame_result$key' width='350px' height='100px' frameborder='0'></iframe>";
+                            echo "</div>";
+                        }
+                    echo "
+                    </div>
+                    ";
+                    //$this->CI->session->set_userdata('teks_modal',NULL);
+                break;
             case ("submit_multi_2"):
                 echo "<input type='button' class='$class' name='$nama_komponen' id='$id'  onclick='javascript: return SubmitForm_2()' data-toggle='modal' data-target='#myModal_submit_2' value='".$value."'>";
                 //$this->CI->session->userdata('teks_modal')!==NULL?$teks_modal=$this->CI->session->userdata('teks_modal'):$teks_modal='';
