@@ -48,7 +48,194 @@ class Frontoffice extends CI_Controller {
 	{
 		$this->load->view('loginpage');
 	}
+	
+	//===========================================#0002======================================================================================
+	function tes_0002(){
+		$nama_kolom='digest_signature';
+		$nilai_kolom=$this->enkripsi->enkapsulasiData('183315/11/202034b40e6feafdd36d31191fc52fd9f9928e7205fd');
+		$kolom_target='idsurat_masuk';
+		$this->cari_tau_id_surat_masuk($nama_kolom,$nilai_kolom,$kolom_target);
+	}
+	
+	public function cari_tau_id_surat_masuk($nama_kolom,$nilai_kolom,$kolom_target){
+		$kolom_rujukan['nama_kolom']=$nama_kolom;//'digest_signature';
+		$kolom_rujukan['nilai']=$this->enkripsi->dekapsulasiData($nilai_kolom);//$kiriman_dekrip[29];
+		$kolom_target=$kolom_target;//'idsurat_masuk';
+		$idsurat_masuk=$this->model_frommyframework->pembaca_nilai_kolom_tertentu('surat_masuk',$kolom_rujukan,$kolom_target);
+		//contoh bentuk $idsurat_masuk=Array ( [0] => 67 )
+		echo $idsurat_masuk[0];
+	
+		/*
+		//Isi $kiriman untuk idsurat_masuk:
+		$kiriman_dekrip[0]=$idsurat_masuk[0];
+	
+		//Perluas $kiriman_dekrip agar menampung idlogsurat_masuk:
+		array_unshift($kiriman_dekrip,NULL);
+		$kiriman_enkrip=$this->enkripsi->enkapsulasiData($kiriman_dekrip);
+		*/
+	}
+	
+	public function form_combo_database_json_2($table='table_opd',$opd='opd',$kolom_target='bidang'){
+        $query=$this->model_frommyframework->akses_bidang_opd_table_opd($table,$opd,$_POST['nilai_opd'],$kolom_target);
+		echo "<option value=\"\" selected>Klik untuk memilih</option>";
+        foreach($query as $k=>$isi){
+            //if($isi==$_POST['selected']){
+            //}else{
+                echo "<option value=\"".$isi."\">".$isi."</option>";
+            //}
+		}
+		echo "<option value=\"Yang Lain (Others)\">Yang Lain (Others)</option>";
+		
+		echo "
+			<script>
+			$(document).ready(function(){
+					$(\"#".$_POST['id_select_bidang']."\").click(function(){
+					var tampilkan = $(\"#sub_bidang_opd\");
+					//tampilkan.html('OK BRO MASUK......');
+					var nilai_opd = $(\"#".$_POST['id_combo_opd']."\").val();
+					var nilai_bidang = $(\"#".$_POST['id_select_bidang']."\").val();
+					//alert(nilai_bidang);
+					//tampilkan.html('INI ADALAH: id_combo_opd');
+					$.post('".site_url("/Frontoffice/form_combo_database_json_2_sub_bidang/").$table."/opd/bidang/sub_bidang',{nilai_opd:nilai_opd, nilai_bidang:nilai_bidang, selected:\"".$_POST['selected']."\"},
+					function(data,status){
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+				});
+			});
+			</script>
+		";
+	}
 
+	public function form_combo_database_json_ditujukanke_2($table='table_opd',$opd='opd',$kolom_target='bidang'){
+		$nilai_opd=$this->config->item('nama_opd_panjang');
+        $query=$this->model_frommyframework->akses_bidang_opd_table_opd($table,$opd,$nilai_opd,$kolom_target);
+		echo "<option value=\"\" selected>Klik untuk memilih</option>";
+        foreach($query as $k=>$isi){
+            //if($isi==$_POST['selected']){
+            //}else{
+                echo "<option value=\"".$isi."\">".$isi."</option>";
+            //}
+        }
+		echo "<option value=\"Yang Lain (Others)\">Yang Lain (Others)</option>";
+
+		echo "
+			<script>
+			$(document).ready(function(){
+					$(\"#".$_POST['id_select_bidang']."\").click(function(){
+					var tampilkan = $(\"#sub_bidang_opd_ditujukanke\");
+					//tampilkan.html('OK BRO MASUK......');
+					var nilai_opd = '$nilai_opd';
+					var nilai_bidang = $(\"#".$_POST['id_select_bidang']."\").val();
+					//alert(nilai_bidang);
+					//tampilkan.html('INI ADALAH: id_combo_opd');
+					$.post('".site_url("/Frontoffice/form_combo_database_json_2_sub_bidang/").$table."/opd/bidang/sub_bidang',{nilai_opd:nilai_opd, nilai_bidang:nilai_bidang, selected:\"".$_POST['selected']."\"},
+					function(data,status){
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+				});
+			});
+			</script>
+		";
+	}
+	
+	public function form_combo_database_json_2_old($table='table_opd',$opd='opd',$kolom_target='bidang'){
+        $query=$this->model_frommyframework->akses_bidang_opd_table_opd($table,$opd,$_POST['nilai_opd'],$kolom_target);
+        echo "<select class=\"".$_POST['class']."\" id=\"".$_POST['id']."\" name=\"".$_POST['nama_komponen']."\" ".$_POST['atribut'].">";
+        foreach($query as $k=>$isi){
+            if($isi==$_POST['selected']){
+                echo "<option value=\"".$isi."\" selected>".$isi."</option>";
+            }else{
+                echo "<option value=\"".$isi."\">".$isi."</option>";
+            }
+        }
+		echo "</select>";
+		
+		echo "
+			<script>
+			$(document).ready(function(){
+					$(\"#".$_POST['id']."\").click(function(){
+					var tampilkan = $(\"#sub_bidang_opd\");
+					//tampilkan.html('OK BRO MASUK......');
+					var nilai_opd = $(\"#".$_POST['id_combo_opd']."\").val();
+					var nilai_bidang = $(\"#".$_POST['id']."\").val();
+					//alert(nilai_bidang);
+					//tampilkan.html('INI ADALAH: id_combo_opd');
+					$.post('".site_url("/Frontoffice/form_combo_database_json_2_sub_bidang/").$table."/opd/bidang/sub_bidang',{nilai_opd:nilai_opd, nilai_bidang:nilai_bidang, nama_komponen:\"sementara_".$_POST['nama_komponen']."\", class:\"".$_POST['class']."\", id:\"sementara_".$_POST['id']."\", atribut:\"".$_POST['atribut']."\", selected:\"".$_POST['selected']."\"},
+					function(data,status){
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+				});
+			});
+			</script>
+		";
+	}
+
+	public function tes_combo($a1,$a2,$a3,$a4){
+		echo "OK BRO INI tes_combo <br>";
+		echo $a1."==>".$a2."==>".$a3."==>".$a4;
+		echo "<br>";
+		echo "nilai_opd: ".$_POST['nilai_opd'];
+		echo "<br>";
+		echo "nilai_bidang: ".$_POST['nilai_bidang'];
+		echo "<br>";
+		echo "nama_komponen: ".$_POST['nama_komponen'];
+		echo "<br>";
+		echo "class: ".$_POST['class'];
+		echo "<br>";
+		echo "id: ".$_POST['id'];
+		echo "<br>";
+		echo "atribut: ".$_POST['atribut'];
+		echo "<br>";
+		echo "selected: ".$_POST['selected'];
+	}
+	
+	public function form_combo_database_json_2_sub_bidang($table='table_opd',$opd='opd',$bidang='bidang',$kolom_target='sub_bidang'){
+		$kolom2_rujukan=array($opd=>$_POST['nilai_opd'],$bidang=>$_POST['nilai_bidang']);
+		$query=$this->model_frommyframework->akses_sub_bidang_opd_table_opd($table,$opd,$bidang,$kolom2_rujukan);
+        //echo "<select class=\"".$_POST['class']."\" id=\"".$_POST['id']."\" name=\"".$_POST['nama_komponen']."\" ".$_POST['atribut'].">";
+		echo "<option value=\"\" selected>Klik untuk memilih</option>";
+        foreach($query as $k=>$isi){
+            //if($isi==$_POST['selected']){
+            //}else{
+                echo "<option value=\"".$isi."\">".$isi."</option>";
+            //}
+        }
+		echo "<option value=\"Yang Lain (Others)\">Yang Lain (Others)</option>";
+		//echo "</select>";
+		
+    }
+    //===========================================END #0002==================================================================================
+
+	//===========================================#0002======================================================================================
+	public function akses_opd_table_opd(){ 
+		$query=$this->model_frommyframework->select_distinct_kolom_tertentu('table_opd','opd');
+		return $query;
+		//nilai fungsi ini array()
+	}
+
+	public function akses_bidang_opd_table_opd($opd=NULL){ 
+		$kolom_rujukan['nama_kolom']='opd';
+		$kolom_rujukan['nilai']='DINAS PENDIDIKAN';
+		$kolom_target='bidang';
+		$query=$this->model_frommyframework->select_distinct_kolom_tertentu_where('table_opd',$kolom_rujukan,$kolom_target);
+		return $query;
+		//nilai fungsi ini array()
+	}
+
+	public function akses_sub_bidang_opd_table_opd($opd='SEKRETARIS DEWAN PERWAKILAN RAKYAT DAERAH',$bidang='BAGIAN FASILITASI PENGANGGARAN DAN PENGAWASAN'){
+		$query=$this->user_defined_query_controller_as_array($query="select sub_bidang from table_opd where opd='$opd' AND bidang='$bidang'",$token="andisinra");
+		$sub_bidang=array();
+		foreach($query as $k=>$isi){
+			$sub_bidang[$k]=$isi['sub_bidang'];
+		}
+		return $sub_bidang;
+		//nilai fungsi ini array()
+	}
+	//===========================================END #0002==================================================================================
+	
 	//===========================================#0001======================================================================================
 	public function tampilkan_rincian_surat_frontoffice_balasan($size=NULL){
 		$key=$_POST['key'];
@@ -525,11 +712,12 @@ class Frontoffice extends CI_Controller {
 		$coba[5][7]=$isi['no_registrasi_tamu'];
 		$coba[5][4]='readonly';
 
+		/*
 		$coba[6][6]='Satker atau OPD yang Membalas Surat';
 		$coba[6][0]='combo_database';
 		$coba[6][7]=array("nama_satker","nama_satker",'satuan_kerja'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
 		$coba[6][8]=$this->config->item('nama_opd_asli');
-		
+				
 		$coba[7][6]='Bidang atau Bagian yang Membalas Surat';
 		$coba[7][0]='combo_database';
 		$coba[7][7]=array("nama_bidang","nama_bidang",'bidang'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
@@ -537,6 +725,29 @@ class Frontoffice extends CI_Controller {
 
 		$coba[8][6]='Sub-Bidang atau Sub-Bagian yang Membalas Surat';
 		$coba[8][0]='text';
+		*/
+		#==================================================
+		
+		#perbaikan 25 agustus 2020
+		$coba[6][6]='<b>Satker atau OPD yang Membalas Surat</b>';#popo5
+		$coba[6][0]='combo_database';
+		$coba[6][3]='combo_opd';
+		$coba[6][7]=array("opd","opd",'table_opd'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		//$coba[9][8]='';
+
+		$coba[7][0]='combo_database_json';
+		$coba[7][3]='bidang_opd';
+		$coba[7][7]=array("bidang","opd",'table_opd',$coba[6][3],"Klik kolom \"Satker atau OPD yang Membalas Surat\" untuk memunculkan pilihan"); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[7][8]='Yang Lain (Others)';
+		$coba[7][6]='<b>Bidang atau Bagian yang Membalas Surat</b>';
+
+		
+		$coba[8][0]='combo_database_json_2';
+		$coba[8][3]='sub_bidang_opd';
+		$coba[8][7]=array("sub_bidang","bidang","opd",'table_opd',$coba[6][3],$coba[7][3],"Klik kolom \"Dari Bidang\" untuk memunculkan pilihan"); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[8][8]='Yang Lain (Others)';
+		$coba[8][6]='<b>Sub-Bidang atau Sub-Bagian yang Membalas Surat</b>';
+		#==================================================
 
 		$coba[9][0]='hidden';
 		$coba[9][7]=implode("-",array (date("d/m/Y"),date("H:i:s"),mt_rand (1000,9999),microtime()));
@@ -3801,7 +4012,8 @@ class Frontoffice extends CI_Controller {
 
 	//===========================================FUNGSI API UNTUK DIGUNAKAN MELACAK SURAT DI RUANG KABAN===================================
 	public function api_tampilkan_surat_bankdata(){
-		$this->tampilkan_tabel_surat_terusan_new();
+		$this->tampilkan_tabel_terusan_new_verifikasi();
+		#OLD $this->tampilkan_tabel_surat_terusan_new();
 		/*
 		$mode=NULL;
 		$table='surat_masuk';
@@ -14707,6 +14919,7 @@ class Frontoffice extends CI_Controller {
 		//echo "<br>INI query: ".$query;
 		//$query=$this->sanitasi_controller($query);
 		//echo "<br> INI sehabis disanitasi: ".$query;
+		#KANDIDAT $this->penampil_tabel_no_foto_untuk_surat_masuk_frontoffice_surat_masuk_verifikasi_balasan($table,$nama_kolom_id,$array_atribut=array("","id=\"myTable\" class=\"table table-condensed table-hover table-striped\"",""),$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
 		$this->penampil_tabel_no_foto_controller($table,$nama_kolom_id,$array_atribut=array("","id=\"myTable\" class=\"table table-condensed table-hover table-striped\"",""),$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
 		echo "
 			<style>
