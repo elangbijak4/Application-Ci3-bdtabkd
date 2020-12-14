@@ -48,6 +48,1480 @@ class Frontoffice extends CI_Controller {
 	{
 		$this->load->view('loginpage');
 	}
+
+	#=================================================================0004
+	public function tampilkan_rincian_history($kolom_cari,$keyisi){
+		$kolom=$this->enkripsi->dekapsulasiData($_POST['kolom_cari']);
+		$kolom_rujukan['nama_kolom']=$_POST['key'];
+		$kolom_rujukan['nilai']=$_POST['data'];
+		$query=$this->model_frommyframework->pembaca_nilai_baris_tertentu('log_surat_masuk',$kolom_rujukan);
+		
+		echo "
+		<td colspan=".$kolom_cari." align=center valign=top style=\"background:#DADADA;\">
+		<table>";
+			echo "<tr>";
+			foreach($kolom as $k=>$isi){
+				echo "<td>".$isi."</td>";
+			}
+			echo "</tr>";
+		foreach($query->result() as $row){
+			echo "<tr>";
+			foreach($kolom as $k=>$isi){
+				//echo "<td>".$row->$isi."</td>";
+				if($isi!=='status_surat'){
+					if($isi=='timestamp_masuk'){
+						$temporer=explode('-',$row->$isi);
+						echo "<td align=left valign=top>".$temporer[0]."</td>";
+					} else if(($isi=='keterangan')&&(isset($row->keterangan))&&($row->keterangan!='')) {
+						//INI KODE YANG DIPANNGGIL UNTUK MENAMPILKAN HISTORY DI RUANGKABAN
+						echo "<td align=left valign=top>
+								<button class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm kotak\"  style=\"width:100px; height:100%; margin-top:20px; margin-bottom:0px; margin-top:5px;\" id=\"lihat_keterangan$row->idlog_masuk\" data-toggle=\"modal\" data-target=\"#modal_verifikasi\">Lihat Keterangan</button>
+							  </td>
+								<script>
+								$(document).ready(function(){
+									$(\"#lihat_keterangan$row->idlog_masuk\").click(function(){
+										var loading = $(\"#pra_verifikasi\");
+										var tampilkan = $(\"#penampil_verifikasi\");
+										//alert('lihat keterangan');
+										tampilkan.hide();
+										loading.fadeIn(); 
+										loading.fadeOut();
+										tampilkan.html('<div align=\"left\" style=\"margin-left:20px;\"><h4>Keterangan sebelumnya:</h4><br>".$row->keterangan."</div>');
+										tampilkan.fadeIn(2000);
+										
+									});
+								});
+								</script>
+						";
+					}else {
+						echo "<td align=left valign=top>".$row->$isi."</td>";
+					}
+				}else{
+					if($row->$isi=='dibaca'){
+						$warna_badge='success';
+						$time=explode('-',$row->timestamp_baca);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$row->$isi."</span><br>";
+						if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					} else if($row->$isi=='ditolak'){
+						$warna_badge='danger';
+						$time=explode('-',$row->timestamp_tolak);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$row->$isi."</span>";
+						if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					} else if($row->$isi=='dipending'){
+						$warna_badge='warning';
+						$time=explode('-',$row->timestamp_dipending);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$row->$isi."</span>";
+						if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					} else if($row->$isi=='diteruskan'){
+						$warna_badge='primary';
+						$time=explode('-',$row->timestamp_diteruskan);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$row->$isi."</span>";
+						if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					} else if($row->$isi=='selesai'){
+						$warna_badge='success';
+						$time=explode('-',$row->timestamp_dikembalikan);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">SELESAI</span>";
+						if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					} else if($row->$isi=='dibalas'){
+						$warna_badge='success';
+						$time=explode('-',$row->timestamp_dikembalikan);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">DIBALAS</span>";
+						if(isset($time[0])&&($time[0]!='')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					} else {
+						$warna_badge='info';
+						$time=explode('-',$row->timestamp_masuk);
+						echo "<td align=left valign=top><span class=\"badge badge-$warna_badge\">".$row->$isi."</span>";
+						if(isset($time[0])&&($time[0]!='')&&($row->$isi!='masuk')) echo "<span class=\"badge badge-$warna_badge\">Tgl: ".$time[0]."</span>";
+						if(isset($time[1]))echo "<br><span class=\"badge badge-$warna_badge\">Jam: ".$time[1]."</span>";
+					}
+					echo "</td>";
+				}
+			}
+			echo "</tr>";
+		}
+		echo "
+		</table>
+		</td>";
+		
+	}
+
+	#=================================================================0004
+	public function terima_kiriman_email_pemulihan(){
+		#cek apakah nipbaru terdaftar di tabel identpeg?
+		#jika ya, maka proses kirim link untuk reset password ke email atau no hp yang bersangkutan.
+
+		#bersihkan nip dari spasi
+		$filter=explode(' ',$_POST['nipbaru']);
+		$nipbaru='';
+		foreach($filter as $k=>$isi){
+			if($isi!=' '){
+				$nipbaru=$nipbaru.$isi;
+			}
+		}
+		$nipbaru=trim($nipbaru);
+
+		#bersihkan nip dari titik
+		$filter=explode('.',$nipbaru);
+		$nipbaru='';
+		foreach($filter as $k=>$isi){
+			if($isi!='.'){
+				$nipbaru=$nipbaru.$isi;
+			}
+		}
+		$nipbaru=trim($nipbaru,'.');
+
+		
+		#bersihkan nip dari koma
+		$filter=explode(',',$nipbaru);
+		$nipbaru='';
+		foreach($filter as $k=>$isi){
+			if($isi!=','){
+				$nipbaru=$nipbaru.$isi;
+			}
+		}
+		$nipbaru=trim($nipbaru,',');
+
+		//echo "INI NIP BARU: ".$nipbaru."<br>";
+
+				
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$nipbaru;
+		$query=$this->model_frommyframework->pembaca_nilai_kolom_tertentu_like('identpeg',$kolom_rujukan);
+
+		$buffer=array();
+		foreach($query->result() as $row){
+			$buffer['nipbaru']=$row->nipbaru;
+			$buffer['email']=$row->email;
+		}
+		//print_r($buffer);
+		#simpan 
+		if(isset($buffer['nipbaru'])&&isset($buffer['email'])&&$buffer['email']!=''){#periksa email:
+			$tes1=explode('@',$buffer['email']);
+			isset($tes1[1])?$tes2=explode('.',$tes1[1]):NULL;
+			if(isset($tes1[1])&&$tes1!=''&&$tes1[0]!=''&&$tes2[0]!=''&&isset($tes2[1])&&$tes2[1]!=''){
+				$kiriman=array();
+				$kiriman[0]=NULL;
+				$kiriman[1]=$buffer['nipbaru'];
+				$kiriman[2]=$buffer['email'];
+				$kiriman[3]='belum ditanggapi';
+				$kiriman[4]=site_url('Frontoffice/link_pemulihan_email/').rand(10000,99999);
+				$ok=$this->general_insertion_controller_baru($kiriman,'tabel_pemulihan_akun_pegawai');
+				$ok?$message='Permintaan pemulihan akun telah dikirim ke server kami, mohon ditunggu sampai kami selesai memverifikasi permintaan anda. Jika permintaan disetujui, maka link pemulihan password dikirimkan ke email yang tercantum di profil akun pegawai anda sebelumnya.'
+				:$message='Gagal meneruskan permintaan pemulihan anda, coba hubungi admin frontoffice untuk masalah ini, terima kasih.';
+				echo $message;
+			}else{
+				$message='Email anda yang terdaftar di bank data memiliki format email yang keliru sehingga tidak bisa dikirimi pesan link pemulihan, mintalah secara manual link pemulihan ke admin. Terima kasih.';
+				echo $message;
+			}
+		}else{
+			$message='Nip anda tidak terdaftar di bank data sebagai pegawai internal pemprov, atau email pemulihan anda belum ada terdaftar sebelumnya, cobalah untuk mengulangi lagi, atau hubungi admin frontoffice untuk masalah ini, mintalah secara manual link pemulihan ke admin. Terima kasih.';
+			echo $message;
+		}
+		
+
+	}
+
+	public function link_pemulihan_email($kode_pemulihan=NULL){
+		$kolom_rujukan['nama_kolom']='link_pemulihan';
+		$kolom_rujukan['nilai']=site_url('Frontoffice/link_pemulihan_email/').$kode_pemulihan;
+		$query=$this->model_frommyframework->pembaca_nilai_baris_tertentu('tabel_pemulihan_akun_pegawai',$kolom_rujukan);
+		$buffer=array();
+		foreach($query->result() as $row){
+			$buffer['link_pemulihan']=$row->link_pemulihan;
+			$buffer['nipbaru']=$row->nipbaru;
+		}
+		if(isset($buffer['link_pemulihan'])&&$buffer['link_pemulihan']!=''&&isset($buffer['nipbaru'])&&$buffer['nipbaru']!=''){
+			$kolom_rujukan['nama_kolom']='nipbaru';
+			$kolom_rujukan['nilai']=$buffer['nipbaru'];
+			$this->tampilkan_form_ubah_password_dari_pemulihan('identpeg',$kolom_rujukan['nama_kolom'],$kolom_rujukan['nilai']);
+		}else{
+			echo("Link pemulihan anda tidak sesuai, ulangi memasukkan nipbaru pada tombol \"forgot password\" di halaman login untuk memperoleh kode pemulihan yang sesuai atau hubungi admin front office");
+		}
+	}
+	
+	public function tampilkan_form_ubah_password_dari_pemulihan($table=NULL,$kolom=NULL,$nilai=NULL){
+		$this->header_lengkap_bootstrap_controller();
+		echo "<div align=\"center\" style=\"padding:20px;\">";
+		echo "<h5>Form Ubah Password</h5>";
+
+		echo "
+		<style>
+			.pass_show{position: relative} 
+			.pass_show .ptxt { 
+				position: absolute; 
+				top: 50%; 
+				right: 10px;
+				color: #f36c01;
+				margin-top: -10px;
+				cursor: pointer; 
+				transition: .3s ease all;
+			} 
+			.pass_show .ptxt:hover{color: #333333;} 
+		</style>
+		";
+
+		echo "
+		<script>
+			$(document).ready(function(){
+				$('.pass_show').append('<span class=\"ptxt\">Show</span>');  
+				});
+				$(document).on('click','.pass_show .ptxt', function(){ 
+				$(this).text($(this).text() == \"Show\" ? \"Hide\" : \"Show\"); 
+				$(this).prev().attr('type', function(index, attr){return attr == 'password' ? 'text' : 'password'; }); 
+				}); 
+		</script> 
+		";
+
+		echo "
+		<form target=\"targetubahpassword\" action=\"".site_url("Frontoffice/ubah_password_dari_pemulihan/".$kolom)."\" method=\"post\" style=\"width:90%;\">
+			<div class=\"form-group \" align=left>
+			<label for=\"kolom_rujukan\">Masukkan password baru:</label>
+			<input type=\"password\" class=\"form-control\" id=\"pwd\" name=\"password\">
+			</div>
+			
+			<div align=left><label for=\"pwd\" >Ulangi ketik password baru:</label></div>
+			<div class=\"form-group pass_show\" align=left>
+			<input type=\"password\" class=\"form-control\" id=\"pwd2\" name=\"password2\">
+			</div>
+			<input type=\"hidden\" class=\"form-control\" id=\"nama_kolom_id\" name=\"nilai\" value=\"".$nilai."\" >
+			<input type=\"hidden\" class=\"form-control\" id=\"table_pwd\" name=\"table\" value=\"".$table."\" >
+			<button type=\"submit\" class=\"btn btn-primary\" style=\"width:100%;\">Submit</button>
+		</form> 
+		";
+		echo "<iframe name='targetubahpassword' width='0' height='0' frameborder='0'></iframe>";
+		echo "</div>";
+	}
+
+	public function ubah_password_dari_pemulihan($nama_kolom){
+		$data = array('password' => password_hash($_POST['password'],PASSWORD_BCRYPT));
+		$kolom_rujukan['nama_kolom']=$nama_kolom;
+		$kolom_rujukan['nilai']=$_POST['nilai'];
+		$this->db->select($nama_kolom);
+		$this->db->where($nama_kolom, $_POST['nilai']);
+		$query = $this->db->get($_POST['table']);
+		if($query->conn_id->affected_rows>0){
+			$this->model_frommyframework->update_style_CI($_POST['table'],$kolom_rujukan,$data);
+		}else{
+			alert("Maaf ".$nama_kolom."=".$_POST['kolom_rujukan']." tidak ada dalam basisdata");
+		}
+	}
+
+	public function email_pemulihan($data=NULL){
+		echo"<h5>Alamat email pemulihan sebelumnya adalah</h5>";
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$email=$this->model_frommyframework->pembaca_nilai_kolom_tertentu('identpeg',$kolom_rujukan,$kolom_target);
+		$pecahan_email=explode(';',$email[0]);
+		echo "
+		<style>
+		.email_table{
+			width:50%;
+		}
+		@media screen and (max-width: 480px) {
+		.email_table{
+			width:100%;
+		}
+		}
+		</style>
+		<table id=\"email_table\" class=\"table table-striped email_table\">";
+		foreach($pecahan_email as $k=>$isi){
+			echo "
+			<tr>
+			<td><i class='fas fa-check fa-sm text-white-100'></i></td>
+			<td>$isi</td>
+			<td style=\"width:120px;\">
+			<button data-toggle=\"modal\" data-target=\"#modal_edit_email_pemulihan\" class=\"btn btn-primary\" id=\"edit_email$k\" style=\"width:40px;margin-top:5px;\"><i class='fas fa-edit fa-sm text-white-100'></i></button>
+			<button class=\"btn btn-danger\" id=\"hapus_email$k\" style=\"width:40px;margin-top:5px;\"><i class='fas fa-trash fa-sm text-white-100'></i></button>
+			</td>
+			</tr>";
+			echo "
+			<script>      
+				$(document).ready(function(){
+				$(\"#edit_email$k\").click(function(){
+					var loading = $(\"#pra_tabel_xxw\");
+					var tampilkan = $(\"#penampil_tabel_xxw\");
+					tampilkan.hide();
+					loading.fadeIn(); 
+					$.post('".site_url('/Frontoffice/edit_email_pemulihan/'.$data)."',{ data_email:\"".$isi."\"},
+					function(data,status){
+						loading.fadeOut();
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+					});
+				$(\"#hapus_email$k\").click(function(){
+					if(confirm('Apakah anda ingin benar-benar menghapus email?')){
+						$.post('".site_url('/Frontoffice/hapus_email/'.$data)."',{data_email_sebelumnya:\"".$isi."\"},
+						function(data,status){
+							if(data){alert('Penghapusan email sukses');}else{alert('Gagal menghapus email');}
+							var loading = $(\"#pra_tabel\");
+							var tampilkan = $(\"#penampil_tabel\");	
+							tampilkan.hide();
+							loading.fadeIn();
+							$.post('".site_url('/Frontoffice/email_pemulihan/'.$data)."',{ data_email:\"okbro\"},
+							function(data,status){
+								loading.fadeOut();
+								tampilkan.html(data);
+								tampilkan.fadeIn(2000);
+							});
+						});
+					}
+					});
+				});
+			</script>
+			";
+		}
+		echo "
+		</table>
+		";
+		echo "
+		<p class=\"email_table\">Alamat email pemulihan dibutuhkan ketika anda lupa password anda. Jika anda lupa dengan password, sistem berusaha mengirim link pemulihan ke alamat-alamat email tersebut. 
+		</p>
+		<button class=\"btn btn-primary email_table\" id=\"tambah_alamat_email\"><i class='fas fa-envelope fa-sm text-white-100'></i> Tambah alamat email pemulihan</button>
+		<script>      
+		$(document).ready(function(){
+			$(\"#tambah_alamat_email\").click(function(){
+			var loading = $(\"#pra_tabel_xxy\");
+			var tampilkan = $(\"#penampil_tabel_xxy\");
+			tampilkan.hide();
+			loading.fadeIn(); 
+			$.post('".site_url('/Frontoffice/form_tambah_alamat_email/'.$data)."',{ data:\"okbro\"},
+			function(data,status){
+				loading.fadeOut();
+				tampilkan.html(data);
+				tampilkan.fadeIn(2000);
+			});
+			});
+			});
+		</script>
+		";
+		echo "
+		<div class=\"email_table\" style=\"margin-top:20px;\">
+		<center>
+		<div id='pra_tabel_xxy' style='display:none;' align='center' >
+		<i class='fa-3x fas fa-spinner fa-pulse' style='color:#97BEE4'></i>
+		</div>
+		</center>
+		<div id='penampil_tabel_xxy' align='center' ></div>
+		</div>
+		";
+		echo "
+			<!-- Modal CRUID KECIL-->
+			<div class='modal fade' id='modal_edit_email_pemulihan' role='dialog' style='z-index:100000;'>
+				<div class='modal-dialog'>
+				
+				<!-- Modal content-->
+				<div class=\"modal-content\" ".$this->config->item('style_modal_admin').">
+					<div class=\"modal-header\">
+					<!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+					<h5 class=\"modal-title\">
+						<img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+						e-Sinra Ruang ".$this->config->item('nama_opd')." Prov. Sulsel
+					</h5>
+					<button type='button' class='close' data-dismiss='modal'>&times;</button>
+					</div>
+					<div class='modal-body'>
+					<center>
+					<div id='pra_tabel_xxw' style='width:65%;' align='center' >
+					<i class='fa-3x fas fa-spinner fa-pulse' ".$this->config->item('style_progres_bulat_admin')."></i>
+					<!--
+					<div class='progress' style='margin-top:50px; height:20px'>
+						<div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+						mohon tunggu...
+						</div>
+					</div>
+					-->
+					</center>
+					<div id=penampil_tabel_xxw align='center' style='width:100%;'></div>
+					</div>
+					<div class='modal-footer'>
+					<button type='button' id='close_modal_email' class='btn btn-primary btn-sm' data-dismiss='modal'>Close</button>
+					</div>
+				</div>
+				
+				</div>
+			</div>
+		";
+	}
+
+	public function tes_email(){
+		echo "OK BRO";
+	}
+
+	public function hapus_email($data=NULL){
+		#Baca terlebuh dulu isi kolom email tamu
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$email=$this->model_frommyframework->pembaca_nilai_kolom_tertentu('identpeg',$kolom_rujukan,$kolom_target);
+		$list_email_baru=trim(str_replace($_POST['data_email_sebelumnya'],'',$email[0]),';');
+
+		//alert($email[0]);
+		//$data_email_baru=$email[0].";".$_POST['data_email'];
+		//echo $data_email_baru;
+		
+		#Update list email pemulihan
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$data_baru[$kolom_target]=$list_email_baru;
+		$ok=$this->model_frommyframework->update_style_CI_no_alert('identpeg',$kolom_rujukan,$data_baru);
+		//if($ok){echo "email pemulihan baru berhasil ditambahkan";}else{echo "Gagal menambahkan email pemulihan baru";}
+		//print_r($ok);
+		echo $ok;
+
+	}
+
+	public function edit_email_pemulihan($data=NULL){
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$email=$this->model_frommyframework->pembaca_nilai_kolom_tertentu('identpeg',$kolom_rujukan,$kolom_target);
+		//$data_email_baru=$email[0].";".$_POST['data_email'];
+		echo "
+			<div style='padding:5px;'>
+			<form>
+				<label for='edit_alamat_email_pemulihan'>Silahkan mengedit email pemulihan anda</label>
+				<input type='text' class='form-group' id='edit_alamat_email_pemulihan' name='edit_alamat_email_pemulihan' style='width:100%;' value=\"".$_POST['data_email']."\">
+			</form>
+			<button class=\"btn btn-primary\" id=\"edit_email_pemulihan\" style=\"width:100%;\"><i class='fas fa-save fa-sm text-white-100'></i> Simpan</button>
+			<script>      
+			$(document).ready(function(){
+				$(\"#edit_email_pemulihan\").click(function(){
+				var loading = $(\"#pra_tabel_xxw\");
+				var tampilkan = $(\"#penampil_tabel_xxw\");	
+				var email = $(\"#edit_alamat_email_pemulihan\").val();
+				//alert('".$_POST['data_email']."');
+				tampilkan.hide();
+				loading.fadeIn();
+				$.post('".site_url('/Frontoffice/simpan_hasil_edit_email_pemulihan/'.$data)."',{ data_email_edit:email,data_email_sebelumnya:\"".$_POST['data_email']."\"},
+				function(data,status){
+					if(data){alert('Pengeditan email sukses');}else{alert('Gagal mengedit email pemulihan');}
+					var loading = $(\"#pra_tabel\");
+					var tampilkan = $(\"#penampil_tabel\");	
+					tampilkan.hide();
+					loading.fadeIn();
+					
+					document.getElementById('close_modal_email').click();
+					$.post('".site_url('/Frontoffice/email_pemulihan/'.$data)."',{ data_email:email},
+					function(data,status){
+						loading.fadeOut();
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+				});
+				});
+				});
+			</script>
+		";
+	}
+
+	public function simpan_hasil_edit_email_pemulihan($data=NULL){
+		#Baca terlebuh dulu isi kolom email tamu
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$email=$this->model_frommyframework->pembaca_nilai_kolom_tertentu('identpeg',$kolom_rujukan,$kolom_target);
+		$list_email_baru=str_replace($_POST['data_email_sebelumnya'],$_POST['data_email_edit'],$email[0]);
+		//alert($email[0]);
+		//$data_email_baru=$email[0].";".$_POST['data_email'];
+		//echo $data_email_baru;
+		
+		#Update list email pemulihan
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$data_baru[$kolom_target]=$list_email_baru;
+		$ok=$this->model_frommyframework->update_style_CI_no_alert('identpeg',$kolom_rujukan,$data_baru);
+		//if($ok){echo "email pemulihan baru berhasil ditambahkan";}else{echo "Gagal menambahkan email pemulihan baru";}
+		//print_r($ok);
+		echo $ok;
+		
+	}
+
+	public function form_tambah_alamat_email($data=NULL){
+		echo "
+			<div style='padding:5px;'>
+			<form>
+				<label for='alamat_email_pemulihan'>Masukkan alamat email pemulihan tambahan</label>
+				<input type='text' class='form-group' id='alamat_email_pemulihan' name='tambah_email_pemulihan' style='width:100%;' placeholder=\"emailku@alamat.com\">
+			</form>
+			<button class=\"btn btn-primary\" id=\"tambah_email_pemulihan\" style=\"width:100%;\"><i class='fas fa-plus fa-sm text-white-100'></i> Tambahkan</button>
+			<script>      
+			$(document).ready(function(){
+				$(\"#tambah_email_pemulihan\").click(function(){
+				var loading = $(\"#pra_tabel_xxy\");
+				var tampilkan = $(\"#penampil_tabel_xxy\");	
+				var email = $(\"#alamat_email_pemulihan\").val();
+				tampilkan.hide();
+				loading.fadeIn();
+				$.post('".site_url('/Frontoffice/tambah_email_pemulihan/'.$data)."',{ data_email:email},
+				function(data,status){
+					if(data){alert('Penambahan email baru sukses');}else{alert('Gagal menambahkan email pemulihan baru');}
+					var loading = $(\"#pra_tabel\");
+					var tampilkan = $(\"#penampil_tabel\");	
+					tampilkan.hide();
+					loading.fadeIn();
+					$.post('".site_url('/Frontoffice/email_pemulihan/'.$data)."',{ data_email:email},
+					function(data,status){
+						loading.fadeOut();
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+				});
+				});
+				});
+			</script>
+		";
+	}
+
+	public function tambah_email_pemulihan($data=NULL){
+		#Baca terlebuh dulu isi kolom email tamu
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$email=$this->model_frommyframework->pembaca_nilai_kolom_tertentu('identpeg',$kolom_rujukan,$kolom_target);
+		$data_email_baru=$email[0].";".$_POST['data_email'];
+		//echo $data_email_baru;
+		
+		#Update list email pemulihan
+		$kolom_rujukan['nama_kolom']='nipbaru';
+		$kolom_rujukan['nilai']=$data;
+		$kolom_target='email';
+		$data_baru[$kolom_target]=$data_email_baru;
+		$ok=$this->model_frommyframework->update_style_CI_no_alert('identpeg',$kolom_rujukan,$data_baru);
+		//if($ok){echo "email pemulihan baru berhasil ditambahkan";}else{echo "Gagal menambahkan email pemulihan baru";}
+		//print_r($ok);
+		echo $ok;
+	}
+
+	public function lupa_password($data=NULL){
+		echo "
+			<div style='padding:5px;'>
+			<form>
+				<label for='nipbaru'>Nip anda (nip baru):</label>
+				<input type='text' class='form-control' id='nipbaru' name='nipbaru' style='width:100%;' placeholder=\"format nip baru 18 digit\">
+				
+			</form>
+			<button class=\"btn btn-primary\" id=\"tombol_pemulihan\" style=\"width:100%;margin-top:5px;\"><i class='fas fa-send fa-sm text-white-100'></i> Kirim</button>
+			<p align=justify>Jika nip anda terdaftar di bank data maka link pemulihan password dikirim ke email anda yang terdaftar di bankdata sesuai dengan profil anda di akun pegawai.
+			Jika anda tidak menerima apapun, berarti email anda tidak ada tercantum di bank data, atau anda telah berganti email sehingga tidak sampai ke anda, untuk itu harap segera menghubungi
+			admin frontoffice agar mendapatkan link pemulihan secara manual.
+			</p>
+			</div>
+			<script>
+				$(document).ready(function(){
+					$(\"#tombol_pemulihan\").click(function(){
+						var loading = $(\"#pra_register\");
+						var tampilkan = $(\"#penampil_register\");
+						var nipbaru = $(\"#nipbaru\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url('/Frontoffice/terima_kiriman_email_pemulihan')."',{nipbaru:nipbaru},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+					});
+				});
+			</script>
+		";
+	}
+	#=================================================================0004
+	
+	#=================================================================0003
+	#Untuk tombol penampung script:
+	public function tombol_di_penampung_script($id=NULL,$berkas=NULL,$surat=NULL){
+		echo "<button class=\"btn btn-primary btn-sm\" id=\"$id\"><i class='fas fa-folder-open fa-sm text-white-100'></i> Buka berkas pendukung</button>";
+		echo "
+		<script>
+		$(document).ready(function(){
+			$(\"#$id\").click(function(){
+				var loading = $(\"#pra_verifikasi\");
+				var tampilkan = $(\"#penampil_verifikasi\");
+				var button = $(\"#penampung_script\");
+				//alert('lihat keterangan');
+				tampilkan.hide();
+				loading.fadeIn(); 
+				$.post('".site_url('Frontoffice/tombol_di_penampung_script_inverse/'.$id.'/'.$berkas.'/'.$surat)."',{ data:\"okbro\"},
+				function(data,status){
+					button.html(data);
+					button.fadeIn(2000);
+				});
+				$.post('".site_url('Frontoffice/tesopenpdf/'.$berkas)."',{ data:\"okbro\"},
+				function(data,status){
+					loading.fadeOut();
+					tampilkan.html(data);
+					tampilkan.fadeIn(2000);
+				});
+			});
+		});
+		</script>
+	";
+	}
+
+	public function tombol_di_penampung_script_inverse($id=NULL,$berkas=NULL,$surat=NULL){
+		echo "<button class=\"btn btn-warning btn-sm\" id=\"inverse$id\"><i class='fas fa-backward fa-sm text-white-100'></i> Buka Kembali Surat</button>";
+		echo "
+		<script>
+		$(document).ready(function(){
+			$(\"#inverse$id\").click(function(){
+				var loading = $(\"#pra_verifikasi\");
+				var tampilkan = $(\"#penampil_verifikasi\");
+				var button = $(\"#penampung_script\");
+				//alert('lihat keterangan');
+				tampilkan.hide();
+				loading.fadeIn(); 
+				$.post('".site_url('Frontoffice/tombol_di_penampung_script/'.$id.'/'.$berkas.'/'.$surat)."',{ data:\"okbro\"},
+				function(data,status){
+					button.html(data);
+					button.fadeIn(2000);
+				});
+				$.post('".site_url('Frontoffice/tesopenpdf/'.$surat)."',{ data:\"okbro\"},
+				function(data,status){
+					loading.fadeOut();
+					tampilkan.html(data);
+					tampilkan.fadeIn(2000);
+				});
+			});
+		});
+		</script>
+	";
+
+	}
+
+	#CRUID new bisa membuka file:
+	public function tampilkan_tabel_cruid_new_with_open($table,$nama_kolom_id,$order='desc'){
+		#=======================0005
+		$this->session->set_userdata('mode_where',NULL);
+		#=======================end0005
+		#$this->session->set_userdata('mode_where_first','first');
+		//$Recordset=$this->user_defined_query_controller_as_array($query='select * from surat_masuk',$token="andisinra");
+		$this->model_frommyframework->reset_counter_notifikasi($counter_table='tbcounter_notifikasi',$kolom_rujukan=array('nama_kolom'=>'idcounter_notifikasi','nilai'=>3),$kolom_target='nilai_counter');
+		//$table='surat_terusan_baru';
+		//$nama_kolom_id='idsurat_terusan';
+		$this->tampil_tabel_cruid_new_with_open($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL);
+		//$this->viewfrommyframework->penampil_tabel_no_foto_untuk_surat_masuk_frontoffice_surat_masuk($kolom_cari,$nama_kolom_direktori_surat,$array_atribut=array(""," class=\"table table-striped\"",""),$query='select * from surat_masuk order by idsurat_masuk desc',$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+	}	
+
+	public function tampil_tabel_cruid_new_with_open($table='surat_masuk',$nama_kolom_id='idsurat_masuk',$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL){
+		//echo "INI NILAI LIMIT: ".$limit;
+		//$kolom_cari_new=array('idsurat_asal','nomor_surat_masuk','perihal_surat','pengirim','ditujukan_ke','status_surat','timestamp_masuk','dari_satker');
+		$nama_kolom_direktori_surat=array('surat'=>'direktori_surat_masuk','berkas'=>'direktori_berkas_yg_menyertai');
+		$this->tampil_tabel_cruid($table,$nama_kolom_id,$order,$limit,$currentpage,$page_awal,$jumlah_page_tampil,$mode,$kolom_cari,$nilai_kolom_cari,$kolom_cari_new=NULL,$nama_kolom_direktori_surat);
+	}
+	#=================================================================end0003
+
+	#===============================================================================0003
+	public function penampil_nota_pdf_bukti_unggah_frontoffice($data_kiriman_enkrip=NULL,$date_note_enkrip=NULL,$data_id=NULL){
+		//echo "OK BRO MASUK<br>";
+		//echo "data_kiriman_enkrip: ".$data_kiriman_enkrip;
+		//echo "date_note_enkrip: ".$date_note_enkrip;
+		echo "<iframe name='iframe_editor_xx' src=\"".site_url('/Frontoffice/pdf2/'.$data_kiriman_enkrip.'/'.$date_note_enkrip.'/'.$data_id)."\" width='100%' height='500px' frameborder='0'></iframe>";
+	} 
+
+	public function pdf2($data_kiriman=NULL,$date_note=NULL,$data_id=NULL){
+			$data_kiriman=$this->enkripsi->dekapsulasiData($data_kiriman);
+			$date_note=$this->enkripsi->dekapsulasiData($date_note);
+			$data_key=array_keys($data_kiriman);
+			//echo "INI date_note: ".$date_note;
+			
+			//Perubahan 24/09/2020 : 21:23
+			$data=array(
+				'NOTA UNGGAH SURAT DAN BERKAS',
+				' '
+			);
+			array_push($data,"");
+			array_push($data,'RINCIAN SURAT DAN BERKAS YANG TERUNGGAH:');
+			$temp="Id Berkas".": ".$data_id;
+			array_push($data,$temp);
+			foreach($data_key as $k){
+				if($k!=="signature"){
+					$temp=$k.": ".$data_kiriman[$k];
+					array_push($data,$temp);
+				}
+			}
+			//$date_note=array(' ','Makassar ',date("d/m/Y"),'Tertanda:','Frontoffice Sistem Terintegrasi BKD Provinsi Sulawesi Selatan');
+			$data=array_merge($data,$date_note);
+			cetak_tiket_pdf($data);
+	}
+	#============================================================================end0003
+
+	#=================================================================0002
+	public function lengkapi_kiriman_untuk_log(){
+		$kiriman_dekrip=$this->enkripsi->dekapsulasiData($_POST['kiriman_enkrip']);
+		$kiriman_dekrip[0]=$_POST['idsurat_masuk'];
+		
+		//Perluas $kiriman_dekrip agar menampung idlogsurat_masuk:
+		array_unshift($kiriman_dekrip,NULL);
+		$kiriman_enkrip=$this->enkripsi->enkapsulasiData($kiriman_dekrip);
+		echo $kiriman_enkrip;
+	}
+
+	public function pemulihan_link_biar_ga_dobel_insert_saat_refresh(){
+		redirect(site_url('Frontoffice/frontoffice_admin/ok/ok/ok'));
+	}
+	#=================================================================end0002
+
+	
+	//===========================================TAMBAHAN TOMBOL FRONTOFFICE=============================================================
+	public function buka_frontoffice($alamat){
+		//$this->session->set_userdata('alamat',$alamat);
+		$this->session->set_userdata('flag0002','ok_go_ahead');
+		echo "
+		Unggah Surat dan Berkas Langsung ke Front Office
+		<button type='button' id=\"unggah_frontoffice_langsung\" style=\"cursor:pointer;color:white;width:90%;margin-top:5px;\" class=\"btn btn-lg btn-primary shadow-sm\" ><i class=\"fas fa-upload text-white-50\" style=\"color:white\"></i> Unggah Surat dan Berkas Front Office</button>
+		<script>      
+                $(document).ready(function(){
+                  $(\"#unggah_frontoffice_langsung\").click(function(){
+                    var loading = $(\"#pra_tabel\");
+                    var tampilkan = $(\"#penampil_tabel\");
+                    tampilkan.hide();
+					loading.fadeIn(); 
+					//alert('ok bro');
+                    $.post('".$this->config->item('link_frontoffice').'index.php/Frontoffice/frontoffice_unggahberkas_dari_ruangkaban/'.$alamat."',{ data:\"okbro\"},
+                    function(data,status){
+                      loading.fadeOut();
+                      tampilkan.html(data);
+                      tampilkan.fadeIn(2000);
+                    });
+                  });
+                  });
+				</script>
+		";
+	}
+	
+	public function buka_frontoffice2_alternatif(){
+		$this->header_lengkap_bootstrap_controller();
+		echo "
+		<div align=\"center\">
+		Unggah Surat dan Berkas Langsung ke Front Office
+		<button type='button' id=\"unggah_frontoffice_langsung\" style=\"cursor:pointer;color:white;width:90%;margin-top:5px;\" class=\"btn btn-lg btn-primary shadow-sm\" ><i class=\"fas fa-upload text-white-50\" style=\"color:white\"></i> Unggah Surat dan Berkas Front Office</button>
+		</div>
+		<center>
+              <div id='pra_tabel_xx' style='width:40%;display:none;' align='center' >
+              <i class='fa-3x fas fa-spinner fa-pulse' style='color:#97BEE4'></i>
+              </div>
+            </center>
+            <div id='penampil_tabel_xx' align='center' style='width:100%;overflow:auto;'></div>
+		<script>      
+                $(document).ready(function(){
+                  $(\"#unggah_frontoffice_langsung\").click(function(){
+                    var loading = $(\"#pra_tabel_xx\");
+                    var tampilkan = $(\"#penampil_tabel_xx\");
+                    tampilkan.hide();
+                    loading.fadeIn(); 
+                    $.post('".$this->config->item('alamat_frontoffice').'/index.php/Frontoffice/frontoffice_unggahberkas_dari_ruangkaban/'."',{ data:\"okbro\"},
+                    function(data,status){
+                      loading.fadeOut();
+                      tampilkan.html(data);
+                      tampilkan.fadeIn(2000);
+                    });
+                  });
+                  });
+				</script>
+		";
+	}
+
+	public function buka_frontoffice_obselet(){
+		echo "<iframe name='iframe_editor_xx' src=\"".site_url('/Frontoffice/buka_frontoffice2/')."\" width='100%' height='500px' frameborder='0'></iframe>";
+	}
+
+	public function unggah_berkas_frontoffcie_langsung_obselet(){
+		echo "<iframe name='iframe_editor' src=\"".$this->config->item('alamat_frontoffice').'/index.php/Frontoffice/frontoffice_unggahberkas_dari_ruangkaban/'."\" width='100%' height='500px' frameborder='0'></iframe>";
+	}
+
+	//===========================================END TAMBAHAN TOMBOL FRONTOFFICE=========================================================
+	
+	//===========================================#0001======================================================================================
+	public function perubah_status_menjadi_dibalas(){
+		$ok=unserialize($this->session->userdata('state_rekord_yang_sedang_diproses'));
+		//ubah dulu status menjadi dibalas
+		//ambil dari session, rekord apa yang membalas surat.
+		//lalu panggil tampilkan_tabel_terusan_new_verifikasi()
+		$kolom_rujukan['nama_kolom']=$ok['key'];
+		$kolom_rujukan['nilai']=$ok['data'];
+		$kolom_target='status_surat';
+		$data[$kolom_target]='dibalas';
+		$okfoto=$this->model_frommyframework->update_style_CI_no_alert('surat_terusan_baru',$kolom_rujukan,$data);
+		$kolom_target='timestamp_dikembalikan';
+		$data[$kolom_target]=implode("-",array (date("d/m/Y"),date("H:i:s"),mt_rand (1000,9999),microtime()));
+		$okfoto=$this->model_frommyframework->update_style_CI_no_alert('surat_terusan_baru',$kolom_rujukan,$data);
+		$this->tampilkan_tabel_terusan_new_verifikasi();
+	}
+
+	public function pra_unggah_surat_frontoffice_balasan(){
+		$yang_diubah=array('key'=>$_POST['key'],'data'=>$_POST['data']);
+		$this->session->set_userdata('state_rekord_yang_sedang_diproses',serialize($yang_diubah));
+		echo "
+		<script>
+		$(document).ready(function(){
+			var tampilkan = $(\"#penampung_form_balasan\");
+			$.post('".$this->config->item('bank_data')."/index.php/Frontoffice/unggah_surat_frontoffice_balasan"."',{isi:\"".$_POST['isi']."\", url_balik:\"".$_POST['url_balik']."\" },
+			function(data,status){
+				tampilkan.html(data);
+				tampilkan.fadeIn(2000);
+			});
+		});
+		</script>
+		<div id=\"penampung_form_balasan\"></div>
+		";
+	}
+	
+	public function pra_selesai(){
+		echo "
+		<script>
+		$(document).ready(function(){
+			 var tampilkan1 = $(\"#penampung_sementara\");
+			 //KESALAHAN YANG LAMA DISINI ADALAH BAHWA KAMU TIDAK BISA MENULIS {data:data} 
+			 //KARENA data tidak dideklarasikan dalam potongan javascript ini, tetapi gunakan {data:\"data\"} baru bisa WORK.
+			 $.post('".$this->config->item('bank_data')."/index.php/Frontoffice/cek_apakah_surat_sudah_dibalas"."',{key:\"".$_POST['key']."\", data:\"".$_POST['data']."\"},
+			 function(dataku,status){
+				 if(dataku=='OK'){
+					var loading = $(\"#pra_verifikasi\");
+					var tampilkan = $(\"#penampil_verifikasi\");
+					tampilkan.hide();
+					loading.fadeIn(); 
+					$.post('".site_url('/Frontoffice/selesai')."',{key:\"".$_POST['key0']."\",data:\"".$_POST['data0']."\" },
+					function(data,status){
+						//alert(data);
+						loading.fadeOut();
+						tampilkan.html(data);
+						tampilkan.fadeIn(2000);
+					});
+				 }else{
+					tampilkan1.html('<div class=\"alert alert-danger\"><strong>Maaf!</strong> Surat belum di balas, harap dibalas lebih dulu untuk memberikan status <strong style=\"color:red;\">Selesai</strong>.</div>');
+					tampilkan1.fadeIn(2000);
+				 }
+			 });
+		 });
+		 </script>
+		 <div id='penampung_sementara'>ok bro bawah</div>
+		";
+	}
+	//===========================================#end0001===================================================================================
+	
+	//===========================================TAMBAHAN KHUSUS UNTUK CRUID NEW VERIFIKASI================================================
+	public function tampilkan_tabel_terusan_new_verifikasi_OLD_25_11_2020(){
+		//$Recordset=$this->user_defined_query_controller_as_array($query='select * from surat_masuk',$token="andisinra");
+		$this->model_frommyframework->reset_counter_notifikasi($counter_table='tbcounter_notifikasi',$kolom_rujukan=array('nama_kolom'=>'idcounter_notifikasi','nilai'=>3),$kolom_target='nilai_counter');
+		$table='surat_terusan_baru';
+		$nama_kolom_id='idsurat_terusan';
+		$this->tampil_tabel_cruid_new_verifikasi($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL);
+		//$this->viewfrommyframework->penampil_tabel_no_foto_untuk_surat_masuk_frontoffice_surat_masuk($kolom_cari,$nama_kolom_direktori_surat,$array_atribut=array(""," class=\"table table-striped\"",""),$query='select * from surat_masuk order by idsurat_masuk desc',$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+	}	
+	//===========================================END TAMBAHAN KHUSUS UNTUK CRUID NEW VERIFIKASI============================================
+		
+	//===========================================RENCANA FUNGSI UNTUK MENAMPILKAN PROFIL=================================================
+	public function penampil_icon_foto_profil(){
+		$kolom_rujukan['nama_kolom']='status';
+		$kolom_rujukan['nilai']='default';
+		$query=$this->model_frommyframework->pembaca_nilai_baris_tertentu('tabel_profil',$kolom_rujukan);
+		//print_r($query);
+		$buffer=array();
+		foreach($query->result() as $row){
+			$buffer['idprofil']=$row->idprofil;
+			$buffer['nama']=$row->nama;
+			$buffer['nip']=$row->nip;
+			$buffer['jabatan']=$row->jabatan;
+			$buffer['deskripsi_diri']=$row->deskripsi_diri;
+			$buffer['direktori_foto']=$row->direktori_foto;
+			$buffer['status']=$row->status;
+		}
+		$this->session->set_userdata('nama_profil',$buffer['nama']);
+		echo base_url($buffer['direktori_foto']);
+		/*
+		echo "
+		<span class=\"mr-2 d-none d-lg-inline text-gray-600 small\">".$buffer['nama']."</span>
+                <img class=\"img-profile rounded-circle\" src=\"".base_url($buffer['direktori_foto'])." alt=\"Admin\">
+		";
+		*/
+	}
+
+	public function tampilkan_profil($nama_kolom='status',$nilai_kolom='default',$table='tabel_profil'){
+		//ambil data dari basisdata:
+		$kolom_rujukan['nama_kolom']=$nama_kolom;
+		$kolom_rujukan['nilai']=$nilai_kolom;
+		$query=$this->model_frommyframework->pembaca_nilai_baris_tertentu($table,$kolom_rujukan);
+		//print_r($query);
+		$buffer=array();
+		foreach($query->result() as $row){
+			$buffer['idprofil']=$row->idprofil;
+			$buffer['nama']=$row->nama;
+			$buffer['nip']=$row->nip;
+			$buffer['jabatan']=$row->jabatan;
+			$buffer['deskripsi_diri']=$row->deskripsi_diri;
+			$buffer['direktori_foto']=$row->direktori_foto;
+			$buffer['status']=$row->status;
+		}
+
+		//tampilkan dalam sebuah tabel
+	}
+	
+	public function tampilkan_profil2($status='default'){
+		$target_action=site_url('/Frontoffice/target_ganti_foto');
+		$this->viewfrommyframework->penampil_tabel_akun_admin($array_atribut=array(""," class=\"table table-bordered\"",""),$query_yang_mau_ditampilkan="select * from tabel_profil where status=\"".$status."\"",$submenu='',$kolom_direktori='direktori_foto',$direktori_avatar='/public/img/no-image.jpg',$target_action);
+	} 
+
+	public function target_ganti_foto($idprofil){
+		$directory_relatif_file_upload='./public/foto_profil_admin/';	//xx5
+		$upload=array();
+		$upload1=upload('file_ganti_foto', $folder=$directory_relatif_file_upload, $types="jpeg,gif,png,bmp,jpg");
+		if($upload1[0]!==''){
+			$kolom_rujukan['nama_kolom']='idprofil';
+			$kolom_rujukan['nilai']=$idprofil;
+			$kolom_target='direktori_foto';
+			$data[$kolom_target]=$directory_relatif_file_upload.$upload1[0];
+			$okfoto=$this->model_frommyframework->update_style_CI_no_alert('tabel_profil',$kolom_rujukan,$data);
+			!$okfoto?alert('Perubahan foto gagal'):alert('Perubahan foto berhasil');
+		}
+	}
+
+	public function edit_profil($idprofil){
+		//ambil data dari basisdata:
+		$kolom_rujukan['nama_kolom']='idprofil';
+		$kolom_rujukan['nilai']=$idprofil;
+		$query=$this->model_frommyframework->pembaca_nilai_baris_tertentu('tabel_profil',$kolom_rujukan);
+		//print_r($query);
+		$buffer=array();
+		foreach($query->result() as $row){
+			$buffer['idprofil']=$row->idprofil;
+			$buffer['nama']=$row->nama;
+			$buffer['nip']=$row->nip;
+			$buffer['jabatan']=$row->jabatan;
+			$buffer['deskripsi_diri']=$row->deskripsi_diri;
+			$buffer['direktori_foto']=$row->direktori_foto;
+			$buffer['status']=$row->status;
+		}
+		echo "EDIT PROFIL";
+		echo "
+		<div align=left>
+			<form action='".site_url('/Frontoffice/penerima_hasil_edit_profil')."' target='target_ganti_foto2' method='post'>
+			<input type='hidden' class='form-control' id='idprofil' name='idprofil' value='".$buffer['idprofil']."'>
+			<div class='form-group'>
+				<label for='nama'>Nama:</label>
+				<input type='text' class='form-control' id='nama' name='nama' value='".$buffer['nama']."'>
+			</div>
+			<div class='form-group'>
+				<label for='nip'>NIP:</label>
+				<input type='text' class='form-control' id='nip' name='nip' value='".$buffer['nip']."'>
+			</div>
+			<div class='form-group'>
+				<label for='jabatan'>Jabatan:</label>
+				<input type='text' class='form-control' id='jabatan' name='jabatan' value='".$buffer['jabatan']."'>
+			</div>
+			<div class='form-group'>
+				<label for='deskripsi'>Deskripsi diri:</label>
+				<input type='area' class='form-control' id='deskripsi' name='deskripsi' value='".$buffer['deskripsi_diri']."'>
+			</div>
+			<div class='form-group'>
+				<label for='direktori'>Direktori foto:</label>
+				<input type='text' class='form-control' id='direktori' name='direktori' value='".$buffer['direktori_foto']."' readonly>
+			</div>
+			<div class='form-group'>
+				<label for='status'>Status profil:</label>
+				<input type='text' class='form-control' id='status' name='status' value='default' readonly>
+			</div>
+			<button type='submit' style=\"cursor:pointer;color:white;width:100%;margin-top:5px;\" class=\"btn btn-sm btn-success shadow-sm\"><i class=\"fas fa-cloud-upload-alt text-white-50\" style=\"color:white\"></i> Submit</button>
+			</form>
+		</div>
+		<button type='button' id=\"backward\" style=\"cursor:pointer;color:white;width:100%;margin-top:5px;\" class=\"btn btn-sm btn-success shadow-sm\" ><i class=\"fas fa-backward text-white-50\" style=\"color:white\"></i> Kembali ke Profil</button>
+		<script>      
+                $(document).ready(function(){
+                  $(\"#backward\").click(function(){
+                    var loading = $(\"#pra_tabel\");
+                    var tampilkan = $(\"#penampil_tabel\");
+                    tampilkan.hide();
+                    loading.fadeIn(); 
+                    $.post('".site_url('/Frontoffice/tampilkan_profil2')."',{ data:\"okbro\"},
+                    function(data,status){
+                      loading.fadeOut();
+                      tampilkan.html(data);
+                      tampilkan.fadeIn(2000);
+                    });
+                  });
+                  });
+				</script>
+		<iframe name='target_ganti_foto2' id='target_ganti_foto2' width='100%' height='250px' frameborder=''></iframe>
+		";
+	}
+
+	public function penerima_hasil_edit_profil(){
+		$kiriman=array();
+		array_push($kiriman,$_POST['idprofil']);
+		array_push($kiriman,$_POST['nama']);
+		array_push($kiriman,$_POST['nip']);
+		array_push($kiriman,$_POST['jabatan']);
+		array_push($kiriman,$_POST['deskripsi']);
+		array_push($kiriman,$_POST['direktori']);
+		array_push($kiriman,$_POST['status']);
+		//print_r($kiriman);
+		$this->general_update_controller($kiriman,'tabel_profil');
+	}
+	//===========================================END RENCANA FUNGSI UNTUK MENAMPILKAN PROFIL=============================================
+	
+	//===========================================TAMBAHAN UNTUK MELAKUKAN SEARCH SURAT DI AKUN PEGAWAI======================================
+	public function tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai($table='log_surat_masuk',$nama_kolom_id='idlog_masuk',$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$idtamu=NULL){
+		//echo "INI NILAI LIMIT: ".$limit;
+		//alert("INI nilai_kolom_cari: ".$nilai_kolom_cari);
+		$kolom_cari_new=array('idlog_masuk','idsurat_masuk','nomor_surat_masuk','perihal_surat','keterangan','pengirim','ditujukan_ke','status_surat','timestamp_masuk','posisi_surat_terakhir');
+		$nama_kolom_direktori_surat=array('surat'=>'direktori_surat_masuk','berkas'=>'direktori_berkas_yg_menyertai');
+		$this->tampil_tabel_cruid_new_core_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai($table,$nama_kolom_id,$order,$limit,$currentpage,$page_awal,$jumlah_page_tampil,$mode,$kolom_cari,$nilai_kolom_cari,$idtamu,$kolom_cari_new,$nama_kolom_direktori_surat);
+	}
+
+	public function tampil_tabel_cruid_new_core_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$idtamu=NULL,$kolom_cari_new,$nama_kolom_direktori_surat){
+		//echo "INI NILAI LIMIT DALAM: ".$limit;
+		$awal=($currentpage-1)*$limit;
+		/*
+		$this->db->like('title', 'match');
+		$this->db->from('my_table');
+		echo $this->db->count_all_results();
+		$numrekord=$this->db->count_all($table);
+		$jumlah_halaman=ceil($numrekord/$limit);
+		*/
+		/*
+		echo "<br>INI currentpage: ".$currentpage;
+		echo "<br>INI awal: ".$awal;
+		echo "<br>INI JUMLAH HALAMAN: ".$jumlah_halaman;
+		echo "<br>INI mode: ".$mode;
+		echo "<br>INI kolom_cari: ".$kolom_cari;
+		echo "<br>INI nilai_kolom_cari: ".$nilai_kolom_cari;
+		*/
+
+		echo "<div align=left>".ucwords(implode(' ',explode('_',$table)))." >> Halaman ".$currentpage."</div>";
+		echo "<h4 id=\"h4_atas\"><i class=\"fas fa-envelope fa-lg text-white-100\"></i> ".ucwords(implode(' ',explode('_',$table)))."</h4>";
+		
+		echo "<hr><div align=right>";
+		echo "<h4 id=\"h4_bawah\" style=\"position:absolute; left:11px;\"><i class=\"fas fa-envelope fa-lg text-white-100\"></i> ".ucwords(implode(' ',explode('_',$table)))."</h4>";
+		echo "<button id=\"pencarian_lanjut_atas\" class=\"btn btn-xs btn-info\" data-toggle=\"modal\" data-target=\"#searchmodal\">Pencarian Lanjut</button>";
+		echo "</div><hr>";
+		
+		echo "
+			<style>
+				#myInput1{
+					width:30%;
+				}
+				#h4_atas{
+					display:none;
+				}
+				#h4_bawah{
+					display:block;
+				}
+				#quantity{
+					margin-left:5px;
+					width:70px;
+				}
+				#tampilbaris{
+					margin-left:5px;
+				}
+				@media screen and (max-width: 480px) {
+					#myInput1{
+						width:100%;
+					}
+					#h4_atas{
+						display:block;
+						margin-top:20px;
+					}
+					#h4_bawah{
+						display:none;
+					}
+					#quantity{
+						margin-left:0px;
+						width:40%;
+					}
+					#tampilbaris{
+						margin-left:0px;
+						width:59%;
+					}
+				}
+			</style>
+			<script>
+				$(document).ready(function(){
+				$(\"#myInput1\").on(\"keyup\", function() {
+					var value = $(this).val().toLowerCase();
+					$(\"#myTable1 tr\").filter(function() {
+					$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+					});
+				});
+				});
+			</script>
+				<div align=left> 
+				<label for=\"quantity\" style=\"float:left;line-height:2.2;\">Tampilkan jumlah maksimal surat: </label>
+				<input type=\"number\" class=\"form-control\" id=\"quantity\" name=\"quantity\" min=\"1\" value=\"".$limit."\" max=\"100000\" style=\";height:35px;float:left;\">
+				<button class=\"btn btn-xs btn-info\" id=\"tampilbaris\" style=\"height:35px;\">Tampilkan</button>
+				<input type=\"text\" class=\"form-control\" id=\"myInput1\" style=\"float:right;height:35px;min-width:100px;\" placeholder=\"Filter...\">
+				</div>
+		";
+		echo "
+			<script>
+			$(document).ready(function(){
+				$(\"#tampilbaris\").click(function(){
+				var loading = $(\"#pra_tabel\");
+				var tampilkan = $(\"#penampil_tabel\");
+				var limit=$(\"#quantity\").val();
+				var page=$currentpage;
+				var page_awal=$page_awal;
+				var jumlah_page_tampil=$jumlah_page_tampil;
+				var mode='$mode';
+				var kolom_cari='$kolom_cari';
+				var nilai_kolom_cari='$nilai_kolom_cari';
+				var id=$idtamu;
+				tampilkan.hide();
+				loading.fadeIn(); 
+				$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+				function(data,status){
+					loading.fadeOut();
+					tampilkan.html(data);
+					tampilkan.fadeIn(2000);
+				});
+				});
+				});
+			</script>
+		";
+
+		//$mode==NULL?$query=$this->sanitasi_controller("select * from $table where no_registrasi_tamu=$idtamu order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where no_registrasi_tamu=$idtamu AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit $awal,$limit");
+		if($kolom_cari=='nip'){
+			$query=$this->sanitasi_controller("select * from $table where nip=$idtamu order by $nama_kolom_id $order limit $awal,$limit");
+		} else {
+			$query=$this->sanitasi_controller("select * from $table where nip=$idtamu AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit $awal,$limit");
+		}
+		//echo $query;
+		$kolom_cari=='nip'?$where =$this->sanitasi_controller("nip=$idtamu") :$where = $this->sanitasi_controller("nip=$idtamu AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
+		$this->db->where($where);
+		//$this->db->like('title', 'match');
+		$this->db->from($table);
+		$numrekord=$this->db->count_all_results();
+		//$numrekord=$this->db->count_all($table);
+		$jumlah_halaman=ceil($numrekord/$limit);
+		
+		//echo "<br>INI query: ".$query;
+		//$query=$this->sanitasi_controller($query);
+		//echo "<br> INI sehabis disanitasi: ".$query;
+		//$this->penampil_tabel_no_foto_controller($table,$nama_kolom_id,$array_atribut=array("","id=\"myTable\" class=\"table table-condensed table-hover table-striped\"",""),$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+		//$this->viewfrommyframework->penampil_tabel_no_foto_untuk_surat_masuk_frontoffice_surat_masuk ($kolom_cari,$nama_kolom_direktori_surat,$array_atribut,$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+		$this->viewfrommyframework->penampil_tabel_no_foto_untuk_surat_masuk_frontoffice_surat_masuk_verifikasi_untuk_log_surat_frontoffice_di_akun($kolom_cari_new,$nama_kolom_direktori_surat,$array_atribut=array("","id=\"myTable1\" class=\"table table-striped\"",""),$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+		echo "
+			<style>
+				#blokpage{
+					display:flex; justify-content:center;
+				}
+				@media screen and (max-width: 480px) {
+					#blokpage{
+						justify-content:left;
+					}
+				}
+			</style>
+			<div id=\"blokpage\">
+			<nav aria-label='...'>
+			<ul class='pagination'>";
+
+			//Siapkan nomor-nomor page yang mau ditampilkan
+			$array_page=NULL;
+			$j=0;
+			for($i=$page_awal;$i<=($page_awal+($jumlah_page_tampil-1));$i++){
+				$array_page[$j]=$i;
+				if($limit*$i>$numrekord)break;
+				$j++;
+			}
+			//print_r($array_page);;
+				
+			if($currentpage<=$jumlah_page_tampil){
+				echo "<li class='page-item disabled'><span class='page-link'>Previous</span></li>";
+			}else{
+				echo "<li class='page-item' id='Previous'><a class='page-link' href='#'>Previous</a></li>";
+				$current_pagePrevious=$array_page[0]-1;
+				$page_awalPrevious=$current_pagePrevious-($jumlah_page_tampil-1);
+				echo "
+						<script>
+						$(document).ready(function(){
+							$(\"#Previous\").click(function(){
+							var loading = $(\"#pra_tabel\");
+							var tampilkan = $(\"#penampil_tabel\");
+							var limit=$(\"#quantity\").val();
+							var page=$current_pagePrevious;
+							var page_awal=$page_awalPrevious;
+							var jumlah_page_tampil=$jumlah_page_tampil;
+							var mode='$mode';
+							var kolom_cari='$kolom_cari';
+							var nilai_kolom_cari='$nilai_kolom_cari';
+							var id=$idtamu;
+							tampilkan.hide();
+							loading.fadeIn(); 
+							$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+							function(data,status){
+								loading.fadeOut();
+								tampilkan.html(data);
+								tampilkan.fadeIn(2000);
+							});
+							});
+							});
+						</script>
+				";
+			}
+
+			
+			//echo "<br>INI current_page: ".$currentpage;
+			//echo "<br>INI page_awal: ".$page_awal;
+
+			//Tampilkan nomor-nomor halaman di paging
+			for($i=$array_page[0];$i<=$array_page[sizeof($array_page)-1];$i++){
+				if($currentpage==$i){
+					//echo "<br>INI DALAM currentpage: ".$currentpage;
+					//echo "<br>INI i: ".$i;
+					echo "<li class='page-item active' id=\"page$i\"><a class='page-link' href='#'>$i</a></li>";
+					echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#page$i\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						var page=$i;
+						var page_awal=$page_awal;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var mode='$mode';
+						var kolom_cari='$kolom_cari';
+						var nilai_kolom_cari='$nilai_kolom_cari';
+						var id=$idtamu;
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+					";				
+				}else{
+					//echo "<br>INI LUAR currentpage: ".$currentpage;
+					//echo "<br>INI i: ".$i;
+					echo "<li class='page-item' id=\"page$i\"><a class='page-link' href='#'>$i</a></li>";
+					echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#page$i\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						var page=$i;
+						var page_awal=$page_awal;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var mode='$mode';
+						var kolom_cari='$kolom_cari';
+						var nilai_kolom_cari='$nilai_kolom_cari';
+						var id=$idtamu;
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+					";
+				}
+				//if($i==$jumlah_page_tampil){break;}
+			}
+		
+		//echo "<br>INI jumlah_halaman: ".$jumlah_halaman;
+		//echo "<br>INI jumlah_page_tampil: ".$jumlah_page_tampil;
+		//echo "<br>INI currentpage: ".$currentpage;
+		//echo "<br>INI TOTAL HITUNG: ".($array_page[0]+$jumlah_page_tampil-1);
+		//if($jumlah_halaman>$jumlah_page_tampil && !($currentpage==$jumlah_halaman)){
+
+		//Kode untuk tombol Next:
+		if(($array_page[0]+$jumlah_page_tampil-1)<$jumlah_halaman){
+			echo "<li class='page-item' id=\"Next\"><a class='page-link' href='#'>Next</a></li>";
+			$current_page=$array_page[sizeof($array_page)-1]+1;
+			$page_awal=$current_page;
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#Next\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						var page=$current_page;
+						var page_awal=$page_awal;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var mode='$mode';
+						var kolom_cari='$kolom_cari';
+						var nilai_kolom_cari='$nilai_kolom_cari';
+						var id=$idtamu;
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+			";
+		}
+		else{
+			echo "<li class='page-item disabled'><a class='page-link' href='#'>Next</a></li>";
+		}
+
+		echo "
+			<li class='page-item disabled'><a class='page-link' href='#'>$jumlah_halaman page</a></li>
+			<li class='page-item disabled'><a class='page-link' href='#'>$numrekord rekord</a></li>
+			</ul>
+			</nav>
+			</div>
+		";
+
+		//go to page:
+		echo "
+			<style>
+				#gotopage{
+					margin-left:5px;
+					width:70px;
+				}
+				#go{
+					margin-left:5px;
+				}
+				@media screen and (max-width: 480px) {
+					#pencarianlanjut{
+						width:100%;
+					}
+					#gotopage{
+						margin-left:0px;
+						width:40%;
+					}
+					#go{
+						margin-left:3px;
+					}
+				}
+			</style>
+				<div align=left>
+				<div style=\"float:left;\">
+				<label for=\"gotopage\" style=\"float:left;line-height:2.2;\">Page: </label>
+				<input type=\"number\" class=\"form-control\" id=\"gotopage\" name=\"gotopage\" min=\"1\" value=\"".$currentpage."\" style=\";height:35px;float:left;\">
+				<button class=\"btn btn-xs btn-primary\" id=\"go\" style=\"height:35px;width:40px;\">go</button>
+				</div>
+				<button class=\"btn btn-xs btn-primary\" id=\"pencarianlanjut\" data-toggle=\"modal\" data-target=\"#searchmodal\" style=\"height:35px;float:right;\">Pencarian Lanjut</button>
+				</div>
+			";
+
+			//Kode untuk id=gotopage dan id=go 
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#go\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						var page=$(\"#gotopage\").val();
+						var page_awal=1;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var mode='$mode';
+						var kolom_cari='$kolom_cari';
+						var nilai_kolom_cari='$nilai_kolom_cari';
+						var id=$idtamu;
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+				";
+			
+			//Modal untuk pencarian lanjut:
+			$fields = $this->model_frommyframework->penarik_semua_nama_kolom_sebuah_tabel($table);
+			echo "
+				<!-- Modal Searching-->
+				<div class=\"modal fade\" id=\"searchmodal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">
+					<div class=\"modal-dialog\" role=\"document\">
+					<div class=\"modal-content\" ".$this->config->item('style_modal_admin').">
+						<div class=\"modal-header\">
+						<h5 class=\"modal-title\" id=\"exampleModalLabel\">Mode Pencarian Lanjut</h5>
+						<button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"Close\">
+							<span aria-hidden=\"true\">×</span>
+						</button>
+						</div>
+						<div class=\"modal-body\" style=\"display:flex; justify-content:center;flex-wrap: wrap;\">
+						
+						<input class=\"form-control\" type=\"text\" id=\"nilai_kolom_cari\" placeholder=\"Search...\"> 
+						<button class=\"btn btn-xs\" disabled>Berdasarkan</button> 
+						<select class=\"form-control\" id=\"kolom_cari\" name=\"kolom_cari\">";
+						echo "<option value=".$fields[0].">Pilih nama kolom tabel</option>";
+						foreach ($fields as $field){
+							if($field=='idsurat_masuk'||$field=='perihal_surat'||$field=='nomor_surat_masuk'||$field=='ditujukan_ke'||$field=='pengirim'||$field=='target_penerima'||$field=='status_surat'||$field=='posisi_surat_terakhir'||$field=='digest_signature'){
+								echo "<option value=\"$field\">".ucwords(implode(' ',explode('_',$field)))."</option>";
+							}
+						}
+						echo "
+						</select>
+						</div>
+						<hr>
+						<div style=\"display:flex; justify-content:center;padding-bottom:20px;\">
+							<label for=\"limicari\" style=\"float:left;line-height:2.2;\">Jumlah maksimal rekord: </label>
+							<input type=\"number\" class=\"form-control\" id=\"limicari\" name=\"limicari\" min=\"1\" value=\"".$limit."\" max=\"100000\" style=\";height:35px;float:left;width:75px;\">
+						</div>
+						<div style=\"display:flex; justify-content:center;padding-bottom:20px;\">
+							<button class=\"btn btn-xs btn-danger\" id=\"lakukanpencarian\" data-dismiss=\"modal\">Lakukan pencarian</button>
+						</div>
+						<div class=\"modal-footer\">
+						<button class=\"btn btn-secondary\" type=\"button\" data-dismiss=\"modal\">Cancel</button>
+						</div>
+					</div>
+					</div>
+				</div>
+			";
+
+			//Kode untuk id=lakukanpencarian
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#lakukanpencarian\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#limicari\").val();
+						var page=1;
+						var page_awal=1;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var kolom_cari=$(\"#kolom_cari\").val();
+						var nilai_kolom_cari=$(\"#nilai_kolom_cari\").val();
+						var mode='TRUE';
+						var id=$idtamu;
+
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun_pegawai/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/'+mode+'/'+kolom_cari+'/'+nilai_kolom_cari+'/'+id,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+				";
+
+	}
+	//===========================================END TAMBAHAN UNTUK MELAKUKAN SEARCH SURAT DI AKUN PEGAWAI==================================
 	
 	//===========================================#0002======================================================================================
 	function tes_0002(){
@@ -249,7 +1723,24 @@ class Frontoffice extends CI_Controller {
 		} 
 	}
 
+	public function tes_userpegawai($konteks=NULL,$key='nip_yang_dibalas',$data='195801311987031006'){
+		$this->tampilkan_tabel_balasan_frontoffice_verifikasi($konteks,$key,$data);
+	}
+
 	public function tampilkan_tabel_balasan_frontoffice_verifikasi($konteks=NULL,$key=NULL,$data=NULL){
+		#saring dulu $data:
+		if($data!=NULL){
+			$data1=explode('%20',$data);
+			$data2='';
+			foreach($data1 as $k=>$isi){
+				if($isi!=''){
+					trim($isi);
+					$data2=$data2.' '.$isi;
+				}
+			}
+			$data=trim($data2);
+		}
+		//echo $data;
 		//$Recordset=$this->user_defined_query_controller_as_array($query='select * from surat_masuk',$token="andisinra");
 		//$this->model_frommyframework->reset_counter_notifikasi($counter_table='tbcounter_notifikasi',$kolom_rujukan=array('nama_kolom'=>'idcounter_notifikasi','nilai'=>3),$kolom_target='nilai_counter');
 		$table='surat_arsip_frontoffice_balasan';
@@ -259,7 +1750,7 @@ class Frontoffice extends CI_Controller {
 	}	
 
 	public function tampil_tabel_cruid_new_verifikasi_balasan($table='surat_arsip_frontoffice_balasan',$nama_kolom_id='idsurat_balasan',$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$konteks=NULL,$key=NULL,$data=NULL){
-		$kolom_cari_new=array('idsurat_masuk_dibalas','nomor_surat_balasan','perihal_surat_balasan','nip_yang_dibalas','no_registrasi_tamu_yang_dibalas','status_surat','timestamp_masuk','dari_bidang');
+		$kolom_cari_new=array('idsurat_masuk_dibalas','nomor_surat_balasan','keterangan','perihal_surat_balasan','nip_yang_dibalas','no_registrasi_tamu_yang_dibalas','status_surat','timestamp_masuk','dari_bidang');
 		$nama_kolom_direktori_surat=array('surat'=>'direktori_surat_masuk','berkas'=>'direktori_berkas_yg_menyertai');
 		$this->tampil_tabel_cruid_new_core_verifikasi_balasan($table,$nama_kolom_id,$order,$limit,$currentpage,$page_awal,$jumlah_page_tampil,$mode,$kolom_cari,$nilai_kolom_cari,$kolom_cari_new,$nama_kolom_direktori_surat,$konteks,$key,$data);
 	}
@@ -351,7 +1842,7 @@ class Frontoffice extends CI_Controller {
 				var limit=$(\"#quantity\").val();
 				tampilkan.hide();
 				loading.fadeIn(); 
-				$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit,{ data:\"okbro\"},
+				$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/$currentpage/$page_awal/$jumlah_page_tampil/$mode/$kolom_cari/$nilai_kolom_cari/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 				function(data,status){
 					loading.fadeOut();
 					tampilkan.html(data);
@@ -363,7 +1854,7 @@ class Frontoffice extends CI_Controller {
 		";
 
 		if($konteks){
-			$mode==NULL?$query=$this->sanitasi_controller("select * from $table where $key=$data order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $key=$data AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit 0,$limit");
+			$mode==NULL?$query=$this->sanitasi_controller("select * from $table where $key=")."'$data'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $key=")."'$data'".$this->sanitasi_controller(" AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit 0,$limit");
 		}else{
 			$mode==NULL?$query=$this->sanitasi_controller("select * from $table order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit 0,$limit");
 		}
@@ -413,7 +1904,7 @@ class Frontoffice extends CI_Controller {
 							var limit=$(\"#quantity\").val();
 							tampilkan.hide();
 							loading.fadeIn(); 
-							$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_pagePrevious+'/'+$page_awalPrevious+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+							$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_pagePrevious+'/'+$page_awalPrevious+'/'+$jumlah_page_tampil+'/$mode/$kolom_cari/$nilai_kolom_cari/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 							function(data,status){
 								loading.fadeOut();
 								tampilkan.html(data);
@@ -444,7 +1935,7 @@ class Frontoffice extends CI_Controller {
 						var limit=$(\"#quantity\").val();
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil+'/$mode/$kolom_cari/$nilai_kolom_cari/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -467,7 +1958,7 @@ class Frontoffice extends CI_Controller {
 						var limit=$(\"#quantity\").val();
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil+'/$mode/$kolom_cari/$nilai_kolom_cari/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -501,7 +1992,7 @@ class Frontoffice extends CI_Controller {
 						var limit=$(\"#quantity\").val();
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_page+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_page+'/'+$page_awal+'/'+$jumlah_page_tampil+'/$mode/$kolom_cari/$nilai_kolom_cari/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -570,7 +2061,7 @@ class Frontoffice extends CI_Controller {
 						var jumlah_page_tampil=$jumlah_page_tampil;
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/$mode/$kolom_cari/$nilai_kolom_cari/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -622,7 +2113,7 @@ class Frontoffice extends CI_Controller {
 				</div>
 			";
 
-			//Kode untuk id=lakukanpencarian
+			//Kode untuk id=lakukanpencarian POKKK
 			echo "
 					<script>
 					$(document).ready(function(){
@@ -638,7 +2129,7 @@ class Frontoffice extends CI_Controller {
 
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/TRUE/'+kolom_cari+'/'+nilai_kolom_cari,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi_balasan/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/TRUE/'+kolom_cari+'/'+nilai_kolom_cari+'/".$konteks."/".$key."/".$data."',{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -676,8 +2167,10 @@ class Frontoffice extends CI_Controller {
 		//$isi=$this->enkripsi->dekapsulasiData($_POST['isi']);
 		echo "OK BRO unggah_surat_frontoffice_balasan_ok";
 	}
-	public function unggah_surat_frontoffice_balasan(){
+	public function unggah_surat_frontoffice_balasan($opd=NULL,$bidang=NULL){
 		//$this->header_lengkap_bootstrap_controller();
+		$opd?$opd1=$this->enkripsi->hexToStr($opd):NULL;
+		$bidang?$bidang1=$this->enkripsi->hexToStr($bidang):NULL;
 		$isi=$this->enkripsi->dekapsulasiData($_POST['isi']);
 		$this->session->set_userdata('url_balik',$_POST['url_balik']);
 		$this->session->set_userdata('isi_yangdibalas',$_POST['isi']);
@@ -728,25 +2221,58 @@ class Frontoffice extends CI_Controller {
 		*/
 		#==================================================
 		
+		/*OBSELET 00:15, 02-12-2020
 		#perbaikan 25 agustus 2020
 		$coba[6][6]='<b>Satker atau OPD yang Membalas Surat</b>';#popo5
 		$coba[6][0]='combo_database';
 		$coba[6][3]='combo_opd';
 		$coba[6][7]=array("opd","opd",'table_opd'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
-		//$coba[9][8]='';
+		//$coba[9][8]='BADAN KEPEGAWAIAN DAERAH';
+		*/
+		$coba[6][6]='<b>Satker atau OPD yang Membalas Surat</b>';
+		$coba[6][0]='text';
+		$coba[6][4]='readonly';
+		isset($opd1)?$coba[6][7]=$opd1:NULL;
 
+		/*OBSELET 00:15, 02-12-2020
 		$coba[7][0]='combo_database_json';
 		$coba[7][3]='bidang_opd';
 		$coba[7][7]=array("bidang","opd",'table_opd',$coba[6][3],"Klik kolom \"Satker atau OPD yang Membalas Surat\" untuk memunculkan pilihan"); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
 		$coba[7][8]='Yang Lain (Others)';
 		$coba[7][6]='<b>Bidang atau Bagian yang Membalas Surat</b>';
-
+		*/
 		
+		$coba[7][6]='<b>Bidang atau Bagian yang Membalas Surat</b>';
+		$coba[7][0]='text';
+		$coba[7][4]='readonly';
+		isset($bidang1)?$coba[7][7]=$bidang1:NULL;
+
+		/*
+		$kolom_rujukan['nama_kolom']='link_pemulihan';
+		$kolom_rujukan['nilai']=site_url('Frontoffice/link_pemulihan_email/').$kode_pemulihan;
+		$query=$this->model_frommyframework->pembaca_nilai_baris_tertentu('tabel_pemulihan_akun_pegawai',$kolom_rujukan);
+		*/
+		/*
+		$kolom2_rujukan['opd']=$opd1;
+		$kolom2_rujukan['bidang']=$bidang1;
+		$query_subbidang=$this->model_frommyframework->select_distinct_kolom_tertentu_where_and('table_opd',$kolom2_rujukan,'sub_bidang');
+		*/
+		/*
+		print_r($query_subbidang);
+		*/
+		
+		$query_subbidang=$this->akses_sub_bidang_opd_table_opd($opd1,$bidang1);
+		$coba[8][6]='<b>Sub-Bidang atau Sub-Bagian yang Membalas Surat</b>';
+		$coba[8][0]='combo_manual';
+		$coba[8][7]=$query_subbidang;
+
+		/*OBSELET 01.11, 02-12-2020
 		$coba[8][0]='combo_database_json_2';
 		$coba[8][3]='sub_bidang_opd';
 		$coba[8][7]=array("sub_bidang","bidang","opd",'table_opd',$coba[6][3],$coba[7][3],"Klik kolom \"Dari Bidang\" untuk memunculkan pilihan"); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
 		$coba[8][8]='Yang Lain (Others)';
 		$coba[8][6]='<b>Sub-Bidang atau Sub-Bagian yang Membalas Surat</b>';
+		*/
 		#==================================================
 
 		$coba[9][0]='hidden';
@@ -942,7 +2468,7 @@ class Frontoffice extends CI_Controller {
 		*/
 	}
 	//===========================================END TAMBAHAN UNTUK BALAS SURAT TAMU PEGAWAI================================================
-
+	//poko
 	//===========================================TAMBAHAN UNTUK MELAKUKAN SEARCH SURAT DI AKUN TAMU========================================
 	public function tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk_tamu_pegawai_di_akun($table='log_surat_masuk',$nama_kolom_id='idlog_masuk',$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$idtamu=NULL){
 		//echo "INI NILAI LIMIT: ".$limit;
@@ -1068,7 +2594,7 @@ class Frontoffice extends CI_Controller {
 		} else {
 			$query=$this->sanitasi_controller("select * from $table where no_registrasi_tamu=$idtamu AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit $awal,$limit");
 		}
-		
+		//echo $query;
 		$mode==NULL?$where =$this->sanitasi_controller("select * from $table where no_registrasi_tamu=$idtamu") :$where = $this->sanitasi_controller("no_registrasi_tamu=$idtamu AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
 		$this->db->where($where);
 		//$this->db->like('title', 'match');
@@ -1736,7 +3262,7 @@ class Frontoffice extends CI_Controller {
 
 	public function tampil_tabel_cruid_new_verifikasi_untuk_log_surat_masuk($table='surat_masuk',$nama_kolom_id='idsurat_masuk',$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL){
 		//echo "INI NILAI LIMIT: ".$limit;
-		$kolom_cari_new=array('idsurat_masuk','nomor_surat_masuk','perihal_surat','pengirim','keterangan','ditujukan_ke','status_surat','timestamp_masuk','dari_satker');
+		$kolom_cari_new=array('idsurat_masuk','nomor_surat_masuk','perihal_surat','pengirim','keterangan','ditujukan_ke','status_surat','timestamp_masuk','posisi_surat_terakhir');
 		$nama_kolom_direktori_surat=array('surat'=>'direktori_surat_masuk','berkas'=>'direktori_berkas_yg_menyertai');
 		$this->tampil_tabel_cruid_new_core_verifikasi_untuk_log_surat_masuk($table,$nama_kolom_id,$order,$limit,$currentpage,$page_awal,$jumlah_page_tampil,$mode,$kolom_cari,$nilai_kolom_cari,$kolom_cari_new,$nama_kolom_direktori_surat);
 	}
@@ -1835,7 +3361,7 @@ class Frontoffice extends CI_Controller {
 			</script>
 		";
 
-		$mode==NULL?$query=$this->sanitasi_controller("select * from $table order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit 0,$limit");
+		$mode==NULL?$query=$this->sanitasi_controller("select * from $table where $nama_kolom_id in (select max($nama_kolom_id) from $table group by idsurat_masuk) order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit 0,$limit");
 		//echo "<br>INI query: ".$query;
 		//$query=$this->sanitasi_controller($query);
 		//echo "<br> INI sehabis disanitasi: ".$query;
@@ -5527,7 +7053,7 @@ class Frontoffice extends CI_Controller {
 			}
 				$this->hapus_rekord($_POST['nama_tabel'],$_POST['id_hapus']);
 				$this->session->set_userdata('modal',$modal);
-				$this->session->set_userdata('tabel',$_POST['nama_tabel']);;
+				$this->session->set_userdata('tabel_bankdat',$_POST['nama_tabel']);;
 				$this->load->view('admin_frontoffice/dashboard');
 		}else{
 			$this->load->view('admin_frontoffice/dashboard');
@@ -5616,7 +7142,7 @@ class Frontoffice extends CI_Controller {
 			$perekam_id_untuk_button_ajax='';
 			$class='form-control';
 			//$this->session->set_userdata('modal','ok_new');
-			//$this->session->set_userdata('tabel','tbagenda_kerja');
+			//$this->session->set_userdata('tabel_bankdat','tbagenda_kerja');
 			//$this->form_general_2_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control');
 			$this->form_general_2_vertikal_non_iframe_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control',$target_ajax='',$data_ajax=NULL);
 			
@@ -5651,7 +7177,7 @@ class Frontoffice extends CI_Controller {
 					//$this->general_insertion_controller($kiriman,$table);
 					//if($hasil_insersi_surat_berkas){alert('Perubahan data sukses');}else{alert('Perubahan data gagal');}
 					//$this->session->set_userdata('modal',$modal);
-					//$this->session->set_userdata('tabel',$table);
+					//$this->session->set_userdata('tabel_bankdat',$table);
 					//$this->load->view('admin_frontoffice/dashboard');
 			} else {
 				!$table?alert('Nama Tabel yang hendak dirubah tidak ada'):NULL;//alert('Data berhasil ditambahkan');				
@@ -5660,7 +7186,7 @@ class Frontoffice extends CI_Controller {
 		}
 
 			$this->session->set_userdata('modal','ok_new2');
-			$this->session->set_userdata('tabel',$table);
+			$this->session->set_userdata('tabel_bankdat',$table);
 			$this->load->view('admin_frontoffice/dashboard');
 	}
 
@@ -5706,7 +7232,7 @@ class Frontoffice extends CI_Controller {
 		 */
 		$this->session->set_userdata('modal','ok_new2');
 		//$this->session->set_userdata('flag_9001','ok');
-		$this->session->set_userdata('tabel',$table);
+		$this->session->set_userdata('tabel_bankdat',$table);
 		$this->load->view('admin_frontoffice/dashboard');
 	}	
 
@@ -6009,7 +7535,7 @@ class Frontoffice extends CI_Controller {
 	 */
 	$this->session->set_userdata('modal','ok_new2');
 	//$this->session->set_userdata('flag_9001','ok');
-	$this->session->set_userdata('tabel',$table);
+	$this->session->set_userdata('tabel_bankdat',$table);
 	$this->load->view('admin_frontoffice/dashboard');
 		
 	}
@@ -6334,7 +7860,7 @@ class Frontoffice extends CI_Controller {
 		 */
 		$this->session->set_userdata('modal','ok_new2');
 		//$this->session->set_userdata('flag_9001','ok');
-		$this->session->set_userdata('tabel',$table);
+		$this->session->set_userdata('tabel_bankdat',$table);
 		$this->load->view('admin_frontoffice/dashboard');
 
 	}
@@ -7423,13 +8949,13 @@ class Frontoffice extends CI_Controller {
 			//print_r($data_nama_masuk);
 			
 			$this->session->set_userdata('modal','ok_new2');
-			$this->session->set_userdata('tabel',$table);;
+			$this->session->set_userdata('tabel_bankdat',$table);;
 			$this->load->view('admin_frontoffice/dashboard');
 			
 		} else {
 			//alert("Data gagal terkirim");
 			$this->session->set_userdata('modal','ok_new');
-			$this->session->set_userdata('tabel',$table);;
+			$this->session->set_userdata('tabel_bankdat',$table);;
 			$this->load->view('admin_frontoffice/dashboard');
 		}
 	}
@@ -9797,7 +11323,7 @@ class Frontoffice extends CI_Controller {
 		alert('Refresh halaman untuk memperbaharui tampilan data yang baru masuk');
 		/*
 		$this->session->set_userdata('modal','ok_new');
-		$this->session->set_userdata('tabel','tbagenda_kerja');
+		$this->session->set_userdata('tabel_bankdat','tbagenda_kerja');
 		redirect( site_url('Frontoffice/index') );
 		this->load->view('admin_frontoffice/dashboard');
 		*/
@@ -10630,13 +12156,13 @@ class Frontoffice extends CI_Controller {
 			//print_r($data_nama_masuk);
 			
 			$this->session->set_userdata('modal','ok_new');
-			$this->session->set_userdata('tabel',$table);;
+			$this->session->set_userdata('tabel_bankdat',$table);;
 			$this->load->view('admin_frontoffice/dashboard');
 			
 		} else {
 			//alert("Data gagal terkirim");
 			$this->session->set_userdata('modal','ok_new');
-			$this->session->set_userdata('tabel',$table);;
+			$this->session->set_userdata('tabel_bankdat',$table);;
 			$this->load->view('admin_frontoffice/dashboard');
 		}
 	}
@@ -11336,7 +12862,7 @@ class Frontoffice extends CI_Controller {
 			$perekam_id_untuk_button_ajax='';
 			$class='form-control';
 			//$this->session->set_userdata('modal','ok_new');
-			//$this->session->set_userdata('tabel','tbagenda_kerja');
+			//$this->session->set_userdata('tabel_bankdat','tbagenda_kerja');
 			//$this->form_general_2_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control');
 			$this->form_general_2_vertikal_non_iframe_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control',$target_ajax='',$data_ajax=NULL);
 			
@@ -11396,7 +12922,7 @@ class Frontoffice extends CI_Controller {
 			}
 			$this->hapus_rekord($_POST['nama_tabel'],$_POST['id_hapus']);
 			$this->session->set_userdata('modal',$modal);
-			$this->session->set_userdata('tabel',$_POST['nama_tabel']);;
+			$this->session->set_userdata('tabel_bankdat',$_POST['nama_tabel']);;
 			$this->load->view('admin_frontoffice/dashboard');
 			//	redirect(site_url('Frontoffice/frontoffice_admin'));
 		}else{
@@ -11434,7 +12960,7 @@ class Frontoffice extends CI_Controller {
 					//$this->general_insertion_controller($kiriman,$table);
 					//if($hasil_insersi_surat_berkas){alert('Perubahan data sukses');}else{alert('Perubahan data gagal');}
 					$this->session->set_userdata('modal',$modal);
-					$this->session->set_userdata('tabel',$table);;
+					$this->session->set_userdata('tabel_bankdat',$table);;
 					$this->load->view('admin_frontoffice/dashboard');
 			} else {
 				!$table?alert('Nama Tabel yang hendak dirubah tidak ada'):NULL;//alert('Data berhasil ditambahkan');				
@@ -13508,7 +15034,453 @@ class Frontoffice extends CI_Controller {
 				
 	 }
 
-	 public function tampil_tabel_cruid_search($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=TRUE,$kolom_cari=NULL,$nilai_kolom_cari=NULL){
+	 public function tampil_tabel_cruid_search($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$kolom_cari_new=NULL,$nama_kolom_direktori_surat=NULL){
+		$awal=($currentpage-1)*$limit;
+		#$numrekord=$this->db->count_all($table);
+		#$jumlah_halaman=ceil($numrekord/$limit);
+
+		//echo "INI JUMLAH HALAMAN: ".$jumlah_halaman;
+		//echo "<br>INI mode: ".$mode;
+		//echo "<br>INI kolom_cari: ".$kolom_cari;
+		//echo "<br>INI nilai_kolom_cari: ".$nilai_kolom_cari;
+
+		echo "<div align=left>Basisdata >> ".ucwords(implode(' ',explode('_',$table)))." >> Halaman ".$currentpage."</div>";
+		echo "<h4>Kelola Tabel ".ucwords(implode(' ',explode('_',$table)))."</h4>";
+		echo "<hr><div align=right>";
+		echo "<button style=\"position:absolute; left:11px;\" id=\"tambah_data\" class=\"btn btn-xs btn-info\" data-toggle=\"modal\" data-target=\"#modal_tambah_data\">Tambahkan data +</button>";
+		echo "<button id=\"pencarian_lanjut_atas\" class=\"btn btn-xs btn-info\" data-toggle=\"modal\" data-target=\"#searchmodal\">Pencarian Lanjut</button>";
+		echo "</div><hr>";
+		
+		//Kode untuk tambah data:
+		echo "
+			<script>
+              $(document).ready(function(){
+                $(\"#tambah_data\").click(function(){
+                  var loading = $(\"#pra_modal_tambah_data\");
+				  var tampilkan = $(\"#penampil_modal_tambah_data\");
+				  var limit=$(\"#quantity\").val();
+                  tampilkan.hide();
+                  loading.fadeIn(); 
+                  $.post('".site_url("/Frontoffice/tambah_data/".$table)."',{ data:\"okbro\"},
+                  function(data,status){
+                    loading.fadeOut();
+                    tampilkan.html(data);
+                    tampilkan.fadeIn(2000);
+                  });
+                });
+				});
+			</script>
+        ";
+
+		echo "
+			<!-- Modal Tambah Data -->
+			<div class='modal fade' id='modal_tambah_data' role='dialog' style='z-index:100000;'>
+				<div class='modal-dialog modal-lg'>
+				
+				<!-- Modal content-->
+				<div class='modal-content'>
+					<div class='modal-header'>
+					<h4 class='modal-title'>BKD Provinsi Sulawesi Selatan</h4>
+					<button type='button' class='close' data-dismiss='modal'>&times;</button>
+					</div>
+					<div class='modal-body'>
+					<center>
+					<div id='pra_modal_tambah_data' style='width:65%;' align='center' >
+					<i class='fa-3x fas fa-spinner fa-pulse' style='color:#97BEE4'></i>
+					<!--
+					<div class='progress' style='margin-top:50px; height:20px'>
+						<div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+						mohon tunggu...
+						</div>
+					</div>
+					-->
+					</center>
+					<div id=penampil_modal_tambah_data align='center' style='width:100%;'></div>
+					</div>
+					<div class='modal-footer'>
+					<button type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>
+					</div>
+				</div>
+				
+				</div>
+			</div>
+		";
+
+		echo "
+			<style>
+				#myInput{
+					width:30%;
+				}
+				#quantity{
+					margin-left:5px;
+					width:70px;
+				}
+				#tampilbaris{
+					margin-left:5px;
+				}
+				@media screen and (max-width: 480px) {
+					#myInput{
+						width:100%;
+					}
+					#quantity{
+						margin-left:0px;
+						width:40%;
+					}
+					#tampilbaris{
+						margin-left:0px;
+						width:59%;
+					}
+				  }
+			</style>
+			<script>
+				$(document).ready(function(){
+				$(\"#myInput\").on(\"keyup\", function() {
+					var value = $(this).val().toLowerCase();
+					$(\"#myTable tr\").filter(function() {
+					$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+					});
+				});
+				});
+			</script>
+				<div align=left>
+				<label for=\"quantity\" style=\"float:left;line-height:2.2;\">Tampilkan jumlah maksimal rekord: </label>
+				<input type=\"number\" class=\"form-control\" id=\"quantity\" name=\"quantity\" min=\"1\" value=\"".$limit."\" max=\"100000\" style=\";height:35px;float:left;\">
+				<button class=\"btn btn-xs btn-info\" id=\"tampilbaris\" style=\"height:35px;\">Tampilkan</button>
+				<input type=\"text\" class=\"form-control\" id=\"myInput\" style=\"float:right;height:35px;min-width:100px;\" placeholder=\"Filter...\">
+				</div>
+		";
+		echo "
+			<script>
+              $(document).ready(function(){
+                $(\"#tampilbaris\").click(function(){
+                  var loading = $(\"#pra_myModal_suratbaru\");
+				  var tampilkan = $(\"#penampil_myModal_suratbaru\");
+				  var limit=$(\"#quantity\").val();
+                  tampilkan.hide();
+                  loading.fadeIn(); 
+                  $.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit,{ data:\"okbro\"},
+                  function(data,status){
+                    loading.fadeOut();
+                    tampilkan.html(data);
+                    tampilkan.fadeIn(2000);
+                  });
+                });
+				});
+			</script>
+		";
+
+		
+		#=======================0005
+		if($mode==NULL)$mode=$this->session->userdata('mode_where');
+		if($mode=='ok'){
+			$nilai_kolom_cari=$this->session->userdata('nilai_kolom_cari_where');
+			$kolom_cari=$this->session->userdata('kolom_cari_where');
+		}
+		#=======================end 0005
+
+		$mode==NULL?$query=$this->sanitasi_controller("select * from $table order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit $awal,$limit");//kembalikan $awal disini menjadi 0 jika terjadi error.
+		//echo "<br>INI query: ".$query;
+		//$query=$this->sanitasi_controller($query);
+		
+		#=======================0005
+		$mode==NULL?$where =$this->sanitasi_controller("select * from $table order by $nama_kolom_id $order") :$where = $this->sanitasi_controller("$kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
+		if($mode==NULL){
+			$numrekord=$this->db->count_all($table);
+			$jumlah_halaman=ceil($numrekord/$limit);
+			$this->session->set_userdata('mode_where',NULL);
+		}else{
+			$where=$this->sanitasi_controller("$kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
+			$this->db->where($where);
+			$this->db->from($table);
+			$numrekord=$this->db->count_all_results();
+			$jumlah_halaman=ceil($numrekord/$limit);
+			$this->session->set_userdata('mode_where','ok');
+			$this->session->set_userdata('nilai_kolom_cari_where',$nilai_kolom_cari);
+			$this->session->set_userdata('kolom_cari_where',$kolom_cari);
+		}
+		#=======================end0005
+		//echo "<br> INI sehabis disanitasi: ".$query;poki
+		$this->penampil_tabel_no_foto_controller($kolom_cari,$nama_kolom_direktori_surat,$table,$nama_kolom_id,$array_atribut=array("","id=\"myTable\" class=\"table table-condensed table-hover table-striped\"",""),$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+		//$this->penampil_tabel_no_foto_controller ($kolom_cari,$nama_kolom_direktori_surat,$table,$nama_kolom_id,$array_atribut,$query_yang_mau_ditampilkan,$submenu,$kolom_direktori='direktori',$direktori_avatar)
+		echo "
+			<style>
+				#blokpage{
+					display:flex; justify-content:center;
+				}
+				@media screen and (max-width: 480px) {
+					#blokpage{
+						justify-content:left;
+					}
+				}
+			</style>
+			<div id=\"blokpage\">
+			<nav aria-label='...'>
+			<ul class='pagination'>";
+
+			//Siapkan nomor-nomor page yang mau ditampilkan
+			$array_page=NULL;
+			$j=0;
+			for($i=$page_awal;$i<=($page_awal+($jumlah_page_tampil-1));$i++){
+				$array_page[$j]=$i;
+				if($limit*$i>$numrekord)break;
+				$j++;
+			}
+			//print_r($array_page);;
+				
+			if($currentpage<=$jumlah_page_tampil){
+				echo "<li class='page-item disabled'><span class='page-link'>Previous</span></li>";
+			}else{
+				echo "<li class='page-item' id='Previous'><a class='page-link' href='#'>Previous</a></li>";
+				$current_pagePrevious=$array_page[0]-1;
+				$page_awalPrevious=$current_pagePrevious-($jumlah_page_tampil-1);
+				echo "
+						<script>
+						$(document).ready(function(){
+							$(\"#Previous\").click(function(){
+							var loading = $(\"#pra_myModal_suratbaru\");
+							var tampilkan = $(\"#penampil_myModal_suratbaru\");
+							var limit=$(\"#quantity\").val();
+							tampilkan.hide();
+							loading.fadeIn(); 
+							$.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_pagePrevious+'/'+$page_awalPrevious+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+							function(data,status){
+								loading.fadeOut();
+								tampilkan.html(data);
+								tampilkan.fadeIn(2000);
+							});
+							});
+							});
+						</script>
+				";
+			}
+
+			
+			//echo "<br>INI current_page: ".$currentpage;
+			//echo "<br>INI page_awal: ".$page_awal;
+
+			//Tampilkan nomor-nomor halaman di paging
+			for($i=$array_page[0];$i<=$array_page[sizeof($array_page)-1];$i++){
+				if($currentpage==$i){
+					//echo "<br>INI DALAM currentpage: ".$currentpage;
+					//echo "<br>INI i: ".$i;
+					echo "<li class='page-item active' id=\"page$i\"><a class='page-link' href='#'>$i</a></li>";
+					echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#page$i\").click(function(){
+						var loading = $(\"#pra_myModal_suratbaru\");
+						var tampilkan = $(\"#penampil_myModal_suratbaru\");
+						var limit=$(\"#quantity\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+					";				
+				}else{
+					//echo "<br>INI LUAR currentpage: ".$currentpage;
+					//echo "<br>INI i: ".$i;
+					echo "<li class='page-item' id=\"page$i\"><a class='page-link' href='#'>$i</a></li>";
+					echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#page$i\").click(function(){
+						var loading = $(\"#pra_myModal_suratbaru\");
+						var tampilkan = $(\"#penampil_myModal_suratbaru\");
+						var limit=$(\"#quantity\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+					";
+				}
+				//if($i==$jumlah_page_tampil){break;}
+			}
+		
+		//echo "<br>INI jumlah_halaman: ".$jumlah_halaman;
+		//echo "<br>INI jumlah_page_tampil: ".$jumlah_page_tampil;
+		//echo "<br>INI currentpage: ".$currentpage;
+		//echo "<br>INI TOTAL HITUNG: ".($array_page[0]+$jumlah_page_tampil-1);
+		//if($jumlah_halaman>$jumlah_page_tampil && !($currentpage==$jumlah_halaman)){
+
+		//Kode untuk tombol Next:
+		if(($array_page[0]+$jumlah_page_tampil-1)<$jumlah_halaman){
+			echo "<li class='page-item' id=\"Next\"><a class='page-link' href='#'>Next</a></li>";
+			$current_page=$array_page[sizeof($array_page)-1]+1;
+			$page_awal=$current_page;
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#Next\").click(function(){
+						var loading = $(\"#pra_myModal_suratbaru\");
+						var tampilkan = $(\"#penampil_myModal_suratbaru\");
+						var limit=$(\"#quantity\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_page+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+			";
+		}
+		else{
+			echo "<li class='page-item disabled'><a class='page-link' href='#'>Next</a></li>";
+		}
+
+		echo "
+			<li class='page-item disabled'><a class='page-link' href='#'>$jumlah_halaman page</a></li>
+			<li class='page-item disabled'><a class='page-link' href='#'>$numrekord rekord</a></li>
+			</ul>
+			</nav>
+			</div>
+		";
+
+		//go to page:
+		echo "
+			<style>
+				#gotopage{
+					margin-left:5px;
+					width:70px;
+				}
+				#go{
+					margin-left:5px;
+				}
+				@media screen and (max-width: 480px) {
+					#pencarianlanjut{
+						width:100%;
+					}
+					#gotopage{
+						margin-left:0px;
+						width:40%;
+					}
+					#go{
+						margin-left:3px;
+					}
+				}
+			</style>
+				<div align=left>
+				<div style=\"float:left;\">
+				<label for=\"gotopage\" style=\"float:left;line-height:2.2;\">Page: </label>
+				<input type=\"number\" class=\"form-control\" id=\"gotopage\" name=\"gotopage\" min=\"1\" value=\"".$currentpage."\" style=\";height:35px;float:left;\">
+				<button class=\"btn btn-xs btn-primary\" id=\"go\" style=\"height:35px;width:40px;\">go</button>
+				</div>
+				<button class=\"btn btn-xs btn-primary\" id=\"pencarianlanjut\" data-toggle=\"modal\" data-target=\"#searchmodal\" style=\"height:35px;float:right;\">Pencarian Lanjut</button>
+				</div>
+			";
+
+			//Kode untuk id=gotopage dan id=go 
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#go\").click(function(){
+						var loading = $(\"#pra_myModal_suratbaru\");
+						var tampilkan = $(\"#penampil_myModal_suratbaru\");
+						var limit=$(\"#quantity\").val();
+						var page=$(\"#gotopage\").val();
+						var page_awal=1;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+				";
+			
+			//Modal untuk pencarian lanjut:
+			$fields = $this->model_frommyframework->penarik_semua_nama_kolom_sebuah_tabel($table);
+			echo "
+				<!-- Modal Searching-->
+				<div class=\"modal fade\" id=\"searchmodal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">
+					<div class=\"modal-dialog\" role=\"document\">
+					<div class=\"modal-content\">
+						<div class=\"modal-header\">
+						<h5 class=\"modal-title\" id=\"exampleModalLabel\">Mode Pencarian Lanjut</h5>
+						<button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"Close\">
+							<span aria-hidden=\"true\">×</span>
+						</button>
+						</div>
+						<div class=\"modal-body\" style=\"display:flex; justify-content:center;flex-wrap: wrap;\">
+						
+						<input class=\"form-control\" type=\"text\" id=\"nilai_kolom_cari\" placeholder=\"Search...\"> 
+						<button class=\"btn btn-xs\" disabled>Berdasarkan</button> 
+						<select class=\"form-control\" id=\"kolom_cari\" name=\"kolom_cari\">";
+						echo "<option value=".$fields[0].">Pilih nama kolom tabel</option>";
+						foreach ($fields as $field){
+							echo "<option value=\"$field\">".ucwords(implode(' ',explode('_',$field)))."</option>";
+						}
+						echo "
+						</select>
+						</div>
+						<hr>
+						<div style=\"display:flex; justify-content:center;padding-bottom:20px;\">
+							<label for=\"limicari\" style=\"float:left;line-height:2.2;\">Jumlah maksimal rekord: </label>
+							<input type=\"number\" class=\"form-control\" id=\"limicari\" name=\"limicari\" min=\"1\" value=\"".$limit."\" max=\"100000\" style=\";height:35px;float:left;width:75px;\">
+						</div>
+						<div style=\"display:flex; justify-content:center;padding-bottom:20px;\">
+							<button class=\"btn btn-xs btn-danger\" id=\"lakukanpencarian\" >Lakukan pencarian</button>
+						</div>
+						<div class=\"modal-footer\">
+						<button class=\"btn btn-secondary\" type=\"button\" data-dismiss=\"modal\">Cancel</button>
+						</div>
+					</div>
+					</div>
+				</div>
+			";
+
+			//Kode untuk id=lakukanpencarian
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#lakukanpencarian\").click(function(){
+						var loading = $(\"#pra_myModal_suratbaru\");
+						var tampilkan = $(\"#penampil_myModal_suratbaru\");
+						var limit=$(\"#limicari\").val();
+						var page=$(\"#gotopage\").val();
+						var page_awal=1;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var kolom_cari=$(\"#kolom_cari\").val();
+						var nilai_kolom_cari=$(\"#nilai_kolom_cari\").val();
+
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_search/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/TRUE/'+kolom_cari+'/'+nilai_kolom_cari,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+				";
+
+	}
+
+	 public function tampil_tabel_cruid_search_OLD($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=TRUE,$kolom_cari=NULL,$nilai_kolom_cari=NULL){
 		$awal=($currentpage-1)*$limit;
 		$numrekord=$this->db->count_all($table);
 		$jumlah_halaman=ceil($numrekord/$limit);
@@ -14123,10 +16095,10 @@ class Frontoffice extends CI_Controller {
 			$Recordset[$key]=$this->user_defined_query_controller_as_array($query="select * from ".$tabel." where nipbaru=".$kiriman[1],$token='andisinra');
 			$data=$this->enkripsi->enkapsulasiData($Recordset);
 			$pesan="Data Sukses Tersimpan";
-			redirect($this->config->item('base_domain')."/front-office-depan/index.php/Akuntamupegawai/index_dashboard_pegawai/$data/$pesan");
+			redirect($this->config->item('base_domain')."/front-office-depan/index.php/Akuntamupegawai/index_dashboard_pegawai/NULL/NULL/NULL/NULL/NULL/$data/$pesan");
 		}else{
 			$pesan="Data gagal terkirim";
-			redirect($this->config->item('base_domain')."/front-office-depan/index.php/Akuntamupegawai/index_dashboard_pegawai/NULL/$pesan");
+			redirect($this->config->item('base_domain')."/front-office-depan/index.php/Akuntamupegawai/index_dashboard_pegawai/NULL/NULL/NULL/NULL/NULL/NULL/$pesan");
 		}
 	}
 
@@ -14780,7 +16752,451 @@ class Frontoffice extends CI_Controller {
         return $this->model_frommyframework->sanitasi($input);
 	}
 	
-	public function tampil_tabel_cruid($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL){
+	public function tampil_tabel_cruid($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL,$kolom_cari_new=NULL,$nama_kolom_direktori_surat=NULL){
+		$awal=($currentpage-1)*$limit;
+		#$numrekord=$this->db->count_all($table);
+		#$jumlah_halaman=ceil($numrekord/$limit);
+
+		//echo "INI JUMLAH HALAMAN: ".$jumlah_halaman;
+		//echo "<br>INI mode: ".$mode;
+		//echo "<br>INI kolom_cari: ".$kolom_cari;
+		//echo "<br>INI nilai_kolom_cari: ".$nilai_kolom_cari;
+
+		echo "<div align=left>Basisdata >> ".ucwords(implode(' ',explode('_',$table)))." >> Halaman ".$currentpage."</div>";
+		echo "<h4>Kelola Tabel ".ucwords(implode(' ',explode('_',$table)))."</h4>";
+		echo "<hr><div align=right>";
+		echo "<button style=\"position:absolute; left:11px;\" id=\"tambah_data\" class=\"btn btn-xs btn-info\" data-toggle=\"modal\" data-target=\"#modal_tambah_data\">Tambahkan data +</button>";
+		echo "<button id=\"pencarian_lanjut_atas\" class=\"btn btn-xs btn-info\" data-toggle=\"modal\" data-target=\"#searchmodal\">Pencarian Lanjut</button>";
+		echo "</div><hr>";
+		
+		//Kode untuk tambah data:
+		echo "
+			<script>
+              $(document).ready(function(){
+                $(\"#tambah_data\").click(function(){
+                  var loading = $(\"#pra_modal_tambah_data\");
+				  var tampilkan = $(\"#penampil_modal_tambah_data\");
+				  var limit=$(\"#quantity\").val();
+                  tampilkan.hide();
+                  loading.fadeIn(); 
+                  $.post('".site_url("/Frontoffice/tambah_data/".$table)."',{ data:\"okbro\"},
+                  function(data,status){
+                    loading.fadeOut();
+                    tampilkan.html(data);
+                    tampilkan.fadeIn(2000);
+                  });
+                });
+				});
+			</script>
+        ";
+
+		echo "
+			<!-- Modal Tambah Data -->
+			<div class='modal fade' id='modal_tambah_data' role='dialog' style='z-index:100000;'>
+				<div class='modal-dialog modal-lg'>
+				
+				<!-- Modal content-->
+				<div class='modal-content'>
+					<div class='modal-header'>
+					<h4 class='modal-title'>BKD Provinsi Sulawesi Selatan</h4>
+					<button type='button' class='close' data-dismiss='modal'>&times;</button>
+					</div>
+					<div class='modal-body'>
+					<center>
+					<div id='pra_modal_tambah_data' style='width:65%;' align='center' >
+					<div class='progress' style='margin-top:50px; height:20px'>
+						<div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+						mohon tunggu...
+						</div>
+					</div>
+					</center>
+					<div id=penampil_modal_tambah_data align='center' style='width:100%;'></div>
+					</div>
+					<div class='modal-footer'>
+					<button type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>
+					</div>
+				</div>
+				
+				</div>
+			</div>
+		";
+
+		echo "
+			<style>
+				#myInput{
+					width:30%;
+				}
+				#quantity{
+					margin-left:5px;
+					width:70px;
+				}
+				#tampilbaris{
+					margin-left:5px;
+				}
+				@media screen and (max-width: 480px) {
+					#myInput{
+						width:100%;
+					}
+					#quantity{
+						margin-left:0px;
+						width:40%;
+					}
+					#tampilbaris{
+						margin-left:0px;
+						width:59%;
+					}
+				  }
+			</style>
+			<script>
+				$(document).ready(function(){
+				$(\"#myInput\").on(\"keyup\", function() {
+					var value = $(this).val().toLowerCase();
+					$(\"#myTable tr\").filter(function() {
+					$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+					});
+				});
+				});
+			</script>
+				<div align=left>
+				<label for=\"quantity\" style=\"float:left;line-height:2.2;\">Tampilkan jumlah maksimal rekord: </label>
+				<input type=\"number\" class=\"form-control\" id=\"quantity\" name=\"quantity\" min=\"1\" value=\"".$limit."\" max=\"100000\" style=\";height:35px;float:left;\">
+				<button class=\"btn btn-xs btn-info\" id=\"tampilbaris\" style=\"height:35px;\">Tampilkan</button>
+				<input type=\"text\" class=\"form-control\" id=\"myInput\" style=\"float:right;height:35px;min-width:100px;\" placeholder=\"Filter...\">
+				</div>
+		";
+		echo "
+			<script>
+              $(document).ready(function(){
+                $(\"#tampilbaris\").click(function(){
+                  var loading = $(\"#pra_tabel\");
+				  var tampilkan = $(\"#penampil_tabel\");
+				  var limit=$(\"#quantity\").val();
+                  tampilkan.hide();
+                  loading.fadeIn(); 
+                  $.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit,{ data:\"okbro\"},
+                  function(data,status){
+                    loading.fadeOut();
+                    tampilkan.html(data);
+                    tampilkan.fadeIn(2000);
+                  });
+                });
+				});
+			</script>
+		";
+
+		#=======================0005
+		if($mode==NULL)$mode=$this->session->userdata('mode_where');
+		if($mode=='ok'){
+			$nilai_kolom_cari=$this->session->userdata('nilai_kolom_cari_where');
+			$kolom_cari=$this->session->userdata('kolom_cari_where');
+		}
+		#=======================end 0005
+
+		#=======================0005 KHUSUS INI, HANYA MENGANTI limit 0 menjadi limit $awal saja.
+		$mode==NULL?$query=$this->sanitasi_controller("select * from $table order by $nama_kolom_id $order limit $awal,$limit"):$query=$this->sanitasi_controller("select * from $table where $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'".$this->sanitasi_controller(" order by $nama_kolom_id $order limit $awal,$limit");
+		//echo "<br>INI query: ".$query;
+		//$query=$this->sanitasi_controller($query);
+		//echo "<br> INI sehabis disanitasi: ".$query;//popo5$mode==NULL?$where =$this->sanitasi_controller("select * from $table where no_registrasi_tamu=$idtamu") :$where = $this->sanitasi_controller("no_registrasi_tamu=$idtamu AND $kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
+		
+		#=======================0005
+		$mode==NULL?$where =$this->sanitasi_controller("select * from $table order by $nama_kolom_id $order") :$where = $this->sanitasi_controller("$kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
+		if($mode==NULL){
+			$numrekord=$this->db->count_all($table);
+			$jumlah_halaman=ceil($numrekord/$limit);
+			$this->session->set_userdata('mode_where',NULL);
+		}else{
+			$where=$this->sanitasi_controller("$kolom_cari LIKE ")."'%".$this->sanitasi_controller($nilai_kolom_cari)."%'";
+			$this->db->where($where);
+			$this->db->from($table);
+			$numrekord=$this->db->count_all_results();
+			$jumlah_halaman=ceil($numrekord/$limit);
+			$this->session->set_userdata('mode_where','ok');
+			$this->session->set_userdata('nilai_kolom_cari_where',$nilai_kolom_cari);
+			$this->session->set_userdata('kolom_cari_where',$kolom_cari);
+		}
+		#=======================end0005
+		//$numrekord=$this->db->count_all($table);
+		#$jumlah_halaman=ceil($numrekord/$limit);
+		$this->penampil_tabel_no_foto_controller($kolom_cari,$nama_kolom_direktori_surat,$table,$nama_kolom_id,$array_atribut=array("","id=\"myTable\" class=\"table table-condensed table-hover table-striped\"",""),$query,$submenu='',$kolom_direktori='direktori',$direktori_avatar='/public/img/no-image.jpg');
+		echo "
+			<style>
+				#blokpage{
+					display:flex; justify-content:center;
+				}
+				@media screen and (max-width: 480px) {
+					#blokpage{
+						justify-content:left;
+					}
+				}
+			</style>
+			<div id=\"blokpage\">
+			<nav aria-label='...'>
+			<ul class='pagination'>";
+
+			//Siapkan nomor-nomor page yang mau ditampilkan
+			$array_page=NULL;
+			$j=0;
+			for($i=$page_awal;$i<=($page_awal+($jumlah_page_tampil-1));$i++){
+				$array_page[$j]=$i;
+				if($limit*$i>$numrekord)break;
+				$j++;
+			}
+			//print_r($array_page);;
+				
+			if($currentpage<=$jumlah_page_tampil){
+				echo "<li class='page-item disabled'><span class='page-link'>Previous</span></li>";
+			}else{
+				echo "<li class='page-item' id='Previous'><a class='page-link' href='#'>Previous</a></li>";
+				$current_pagePrevious=$array_page[0]-1;
+				$page_awalPrevious=$current_pagePrevious-($jumlah_page_tampil-1);
+				echo "
+						<script>
+						$(document).ready(function(){
+							$(\"#Previous\").click(function(){
+							var loading = $(\"#pra_tabel\");
+							var tampilkan = $(\"#penampil_tabel\");
+							var limit=$(\"#quantity\").val();
+							tampilkan.hide();
+							loading.fadeIn(); 
+							$.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_pagePrevious+'/'+$page_awalPrevious+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+							function(data,status){
+								loading.fadeOut();
+								tampilkan.html(data);
+								tampilkan.fadeIn(2000);
+							});
+							});
+							});
+						</script>
+				";
+			}
+
+			
+			//echo "<br>INI current_page: ".$currentpage;
+			//echo "<br>INI page_awal: ".$page_awal;
+
+			//Tampilkan nomor-nomor halaman di paging
+			for($i=$array_page[0];$i<=$array_page[sizeof($array_page)-1];$i++){
+				if($currentpage==$i){
+					//echo "<br>INI DALAM currentpage: ".$currentpage;
+					//echo "<br>INI i: ".$i;
+					echo "<li class='page-item active' id=\"page$i\"><a class='page-link' href='#'>$i</a></li>";
+					echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#page$i\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+					";				
+				}else{
+					//echo "<br>INI LUAR currentpage: ".$currentpage;
+					//echo "<br>INI i: ".$i;
+					echo "<li class='page-item' id=\"page$i\"><a class='page-link' href='#'>$i</a></li>";
+					echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#page$i\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+					";
+				}
+				//if($i==$jumlah_page_tampil){break;}
+			}
+		
+		//echo "<br>INI jumlah_halaman: ".$jumlah_halaman;
+		//echo "<br>INI jumlah_page_tampil: ".$jumlah_page_tampil;
+		//echo "<br>INI currentpage: ".$currentpage;
+		//echo "<br>INI TOTAL HITUNG: ".($array_page[0]+$jumlah_page_tampil-1);
+		//if($jumlah_halaman>$jumlah_page_tampil && !($currentpage==$jumlah_halaman)){
+
+		//Kode untuk tombol Next:
+		if(($array_page[0]+$jumlah_page_tampil-1)<$jumlah_halaman){
+			echo "<li class='page-item' id=\"Next\"><a class='page-link' href='#'>Next</a></li>";
+			$current_page=$array_page[sizeof($array_page)-1]+1;
+			$page_awal=$current_page;
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#Next\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_page+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+			";
+		}
+		else{
+			echo "<li class='page-item disabled'><a class='page-link' href='#'>Next</a></li>";
+		}
+
+		echo "
+			<li class='page-item disabled'><a class='page-link' href='#'>$jumlah_halaman page</a></li>
+			<li class='page-item disabled'><a class='page-link' href='#'>$numrekord rekord</a></li>
+			</ul>
+			</nav>
+			</div>
+		";
+
+		//go to page:
+		echo "
+			<style>
+				#gotopage{
+					margin-left:5px;
+					width:70px;
+				}
+				#go{
+					margin-left:5px;
+				}
+				@media screen and (max-width: 480px) {
+					#pencarianlanjut{
+						width:100%;
+					}
+					#gotopage{
+						margin-left:0px;
+						width:40%;
+					}
+					#go{
+						margin-left:3px;
+					}
+				}
+			</style>
+				<div align=left>
+				<div style=\"float:left;\">
+				<label for=\"gotopage\" style=\"float:left;line-height:2.2;\">Page: </label>
+				<input type=\"number\" class=\"form-control\" id=\"gotopage\" name=\"gotopage\" min=\"1\" value=\"".$currentpage."\" style=\";height:35px;float:left;\">
+				<button class=\"btn btn-xs btn-primary\" id=\"go\" style=\"height:35px;width:40px;\">go</button>
+				</div>
+				<button class=\"btn btn-xs btn-primary\" id=\"pencarianlanjut\" data-toggle=\"modal\" data-target=\"#searchmodal\" style=\"height:35px;float:right;\">Pencarian Lanjut</button>
+				</div>
+			";
+
+			//Kode untuk id=gotopage dan id=go 
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#go\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#quantity\").val();
+						var page=$(\"#gotopage\").val();
+						var page_awal=1;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+				";
+			
+			//Modal untuk pencarian lanjut:
+			$fields = $this->db->list_fields($table);
+			echo "
+				<!-- Modal Searching-->
+				<div class=\"modal fade\" id=\"searchmodal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">
+					<div class=\"modal-dialog\" role=\"document\">
+					<div class=\"modal-content\">
+						<div class=\"modal-header\">
+						<h5 class=\"modal-title\" id=\"exampleModalLabel\">Mode Pencarian Lanjut</h5>
+						<button class=\"close\" type=\"button\" data-dismiss=\"modal\" aria-label=\"Close\">
+							<span aria-hidden=\"true\">×</span>
+						</button>
+						</div>
+						<div class=\"modal-body\" style=\"display:flex; justify-content:center;flex-wrap: wrap;\">
+						
+						<input class=\"form-control\" type=\"text\" id=\"nilai_kolom_cari\" placeholder=\"Search...\"> 
+						<button class=\"btn btn-xs\" disabled>Berdasarkan</button> 
+						<select class=\"form-control\" id=\"kolom_cari\" name=\"kolom_cari\">";
+						foreach ($fields as $field){
+							echo "<option value=\"$field\">".ucwords(implode(' ',explode('_',$field)))."</option>";
+						}
+						echo "
+						</select>
+						</div>
+						<hr>
+						<div style=\"display:flex; justify-content:center;padding-bottom:20px;\">
+							<label for=\"limicari\" style=\"float:left;line-height:2.2;\">Jumlah maksimal rekord: </label>
+							<input type=\"number\" class=\"form-control\" id=\"limicari\" name=\"limicari\" min=\"1\" value=\"".$limit."\" max=\"100000\" style=\";height:35px;float:left;width:75px;\">
+						</div>
+						<div style=\"display:flex; justify-content:center;padding-bottom:20px;\">
+							<button class=\"btn btn-xs btn-danger\" id=\"lakukanpencarian\" data-dismiss=\"modal\">Lakukan pencarian</button>
+						</div>
+						<div class=\"modal-footer\">
+						<button class=\"btn btn-secondary\" type=\"button\" data-dismiss=\"modal\">Cancel</button>
+						</div>
+					</div>
+					</div>
+				</div>
+			";
+
+			//Kode untuk id=lakukanpencarian
+			echo "
+					<script>
+					$(document).ready(function(){
+						$(\"#lakukanpencarian\").click(function(){
+						var loading = $(\"#pra_tabel\");
+						var tampilkan = $(\"#penampil_tabel\");
+						var limit=$(\"#limicari\").val();
+						//var page=$(\"#gotopage\").val();
+						var page=1;
+						var page_awal=1;
+						var jumlah_page_tampil=$jumlah_page_tampil;
+						var kolom_cari=$(\"#kolom_cari\").val();
+						var nilai_kolom_cari=$(\"#nilai_kolom_cari\").val();
+
+						tampilkan.hide();
+						loading.fadeIn(); 
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/TRUE/'+kolom_cari+'/'+nilai_kolom_cari,{ data:\"okbro\"},
+						function(data,status){
+							loading.fadeOut();
+							tampilkan.html(data);
+							tampilkan.fadeIn(2000);
+						});
+						});
+						});
+					</script>
+				";
+
+	}
+	
+	public function tampil_tabel_cruid_OLD($table,$nama_kolom_id,$order='desc',$limit=20,$currentpage=1,$page_awal=1,$jumlah_page_tampil=4,$mode=NULL,$kolom_cari=NULL,$nilai_kolom_cari=NULL){
 		$awal=($currentpage-1)*$limit;
 		$numrekord=$this->db->count_all($table);
 		$jumlah_halaman=ceil($numrekord/$limit);
@@ -15234,7 +17650,7 @@ class Frontoffice extends CI_Controller {
 			}
 			$this->hapus_rekord($_POST['nama_tabel'],$_POST['id_hapus']);
 			$this->session->set_userdata('modal',TRUE);
-			$this->session->set_userdata('tabel',$_POST['nama_tabel']);;
+			$this->session->set_userdata('tabel_bankdat',$_POST['nama_tabel']);;
 			$this->load->view('admin_frontoffice/dashboard');
 			//	redirect(site_url('Frontoffice/frontoffice_admin'));
 		}else{
@@ -15271,7 +17687,7 @@ class Frontoffice extends CI_Controller {
 					//$this->general_insertion_controller($kiriman,$table);
 					//if($hasil_insersi_surat_berkas){alert('Perubahan data sukses');}else{alert('Perubahan data gagal');}
 					$this->session->set_userdata('modal',TRUE);
-					$this->session->set_userdata('tabel',$table);;
+					$this->session->set_userdata('tabel_bankdat',$table);;
 					$this->load->view('admin_frontoffice/dashboard');
 			} else {
 				!$table?alert('Nama Tabel yang hendak dirubah tidak ada'):NULL;//alert('Data berhasil ditambahkan');				
@@ -15416,17 +17832,21 @@ class Frontoffice extends CI_Controller {
 			$oke=$this->general_insertion_controller($kiriman,$table);
 			//print_r($kiriman);
 			$this->session->set_userdata('modal',TRUE);
-			$this->session->set_userdata('tabel',$table);;
+			$this->session->set_userdata('tabel_bankdat',$table);;
 			$this->load->view('admin_frontoffice/dashboard');
 		} else {
 			//alert("Data gagal terkirim");
 			$this->session->set_userdata('modal',TRUE);
-			$this->session->set_userdata('tabel',$table);;
+			$this->session->set_userdata('tabel_bankdat',$table);;
 			$this->load->view('admin_frontoffice/dashboard');
 		}
 	}
 
-	public function penampil_tabel_no_foto_controller ($array_atribut,$query_yang_mau_ditampilkan,$submenu,$kolom_direktori='direktori',$direktori_avatar){
+	public function penampil_tabel_no_foto_controller ($kolom_cari=NULL,$nama_kolom_direktori_surat=NULL,$table,$nama_kolom_id,$array_atribut,$query_yang_mau_ditampilkan,$submenu,$kolom_direktori='direktori',$direktori_avatar){
+		return $this->viewfrommyframework->penampil_tabel_no_foto($kolom_cari,$nama_kolom_direktori_surat,$table,$nama_kolom_id,$array_atribut,$query_yang_mau_ditampilkan,$submenu,$kolom_direktori,$direktori_avatar);
+	}
+
+	public function penampil_tabel_no_foto_controller_OLD ($array_atribut,$query_yang_mau_ditampilkan,$submenu,$kolom_direktori='direktori',$direktori_avatar){
 		return $this->viewfrommyframework->penampil_tabel_no_foto($array_atribut,$query_yang_mau_ditampilkan,$submenu,$kolom_direktori,$direktori_avatar);
 	}
 
@@ -15540,6 +17960,7 @@ class Frontoffice extends CI_Controller {
 	public function sekretariat_unggahsuratbaru()
 	{
 		//$this->header_lengkap_bootstrap_controller();
+		//echo "WOOOOI";
 		$judul="<span style=\"font-size:20px;font-weight:bold;\">UNGGAH SURAT DAN BERKAS BARU</span>";
 		$tabel="surat_keluar";
 		$coba=array();
@@ -15555,12 +17976,185 @@ class Frontoffice extends CI_Controller {
 			$coba[$key][7]='';
 		}
 
+		#===========================================
+		$coba[3][0]='combo_database_json_3';
+		$coba[3][3]='ditujukan_ke_bidang_opd';
+		$coba[3][7]=array("bidang","opd",'table_opd'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
 		
+		$coba[6][0]='combo_database_json_2';
+		$coba[6][3]='sub_bidang_opd_ditujukanke';
+		$coba[6][7]=array("sub_bidang","bidang","opd",'table_opd',NULL,$coba[3][3],"Klik kolom \"Ditujukan Ke\" untuk memunculkan pilihan"); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[6][8]='Yang Lain (Others)';
+		#===========================================
+		
+		#$coba[6][0]='combo_database';
+		#$coba[6][7]=array("target","target",'target_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		
+		$coba[7][0]='hidden';
+		$coba[7][7]='ASN internal';
+		
+		$coba[8][0]='hidden';
+		$coba[8][7]='BADAN KEPEGAWAIAN DAERAH';
+		$coba[9][0]='hidden';
+		$coba[9][7]='Front Office '.$this->config->item('nama_opd').'';
+		//$coba[10][0]='combo_manual';
+		//$coba[10][7]=array('Sekretaris Badan','Kasubbag Program','Kasubbag Keuangan','Kasubbag Umum, Kepegawaian');
+		$coba[10][0]='hidden';//ini khusus frontoffice, ruangkaban, bankdata dan sekretariat, untuk semua bidang tidak berlaku.
+		$coba[11][0]='hidden';
+		$coba[11][7]=implode("-",array (date("d/m/Y"),date("H:i:s"),mt_rand (1000,9999),microtime()));
+
+		$coba[12][0]='file';
+		$coba[13][0]='file';
+
+		$coba[12][6]='<span style="font-size:20px;color:red;font-weight:bold;">Unggah Surat</span>';
+		$coba[13][6]='<span style="font-size:20px;color:red;font-weight:bold;">Unggah Berkas Pendukung</span>';
+
+		$coba[14][0]='hidden';
+		$coba[15][0]='hidden';
+
+		/*
+		$coba[16][4]='';
+		$coba[16][6]='<b>Diteruskan ke</b>';//popo3
+		$coba[16][0]='combo_database';
+		$coba[16][7]=array("target","target",'target_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		*/
+		$coba[16][0]='hidden';
+
+		$coba[17][0]='area';
+		/*
+		$coba[18][4]='';
+		$coba[18][0]='combo_database';
+		$coba[18][7]=array("nama_status","nama_status",'status_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		*/
+		$coba[18][0]='hidden';
+
+		$coba[19][0]='hidden';
+		$coba[20][0]='hidden';
+		$coba[21][0]='hidden';
+		$coba[22][0]='hidden';
+		$coba[23][0]='hidden';
+		$coba[24][0]='hidden';
+
+		$coba[25][7]='Front Office '.$this->config->item('nama_opd').'';
+		$coba[25][0]='hidden';
+		
+		$coba[28][0]='hidden';
+		
+		/*
+		$coba[26][0]='combo_manual';
+		$coba[26][7]=array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[26][8]=3;
+
+		$coba[27][0]='combo_database';
+		$coba[27][7]=array("nama_urgensi_surat","nama_urgensi_surat",'urgensi_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[27][8]='Yang Lain (Others)';
+		*/
+		
+		$coba[26][0]='hidden';
+		$coba[27][0]='hidden';
+		
+		/*
+		UNTUK DIPAHAMI ULANG:
+		case ("upload") :
+			//echo "submenu_userpelanggan";	
+			$oke=$_SESSION['perekam1'];
+			$nama=$_GET['nama'];
+			$lokasi=$_GET['lokasi'];
+			echo "HKJHKJHASK";
+			foreach ($oke as $isi) {
+			if (!(($isi[type]=='button') || ($isi[type]=='button_ajax') || ($isi[type]=='submit'))) {echo "<br />".$_POST[$isi[nama_komponen]];}}
+			upload($nama,$lokasi,'txt,jpg,jpeg,gif,png');
+		*/
+		//$coba[9][6]='target_surat'; //ini label
+		$target_action='';
+		$komponen=$coba;
+		$atribut_form=" id=\"form_unggah_berkas\" method=\"POST\" enctype=\"multipart/form-data\" action=\"".site_url($target_action)."\" ";
+		$array_option='';
+		$atribut_table=array('table'=>"class=\"table table-condensed\"",'tr'=>"",'td'=>"",'th'=>"");
+		//deskripsi untuk tombol ke-i, $tombol[$i]=array($type 0,$nama_komponen 1,$class 2,$id 3,$atribut 4,$event 5,$label 6,$nilai_awal 7)
+		//jika tombol[0] bertipe 'submit_multi' maka $event berfungsi sebagai pengisi alamat target action yang mau dituju dan berupa array target action.
+		//catatn, untuk $atribut masih error untuk digunakan di tombol[0]. 
+		$tombol[0]=array('submit_multi','submit_nama_komponen','btn btn-primary','id-baru','',array(site_url('/Frontoffice/terima_arsip_surat_keluar'),$this->config->item('bank_data').'/index.php/Frontoffice/terima_arsip_surat_keluar_bidang'),'','Unggah','');
+		$tombol[1]=array('reset','reset','btn btn-warning','reset','','','','Reset','');
+		//$tombol[0]=array('button_ajax_get_CI','button_ajax_get_CI','btn btn-info','button_ajax_get_CI','','','','Kirim','');
+		$value_selected_combo='';
+		$submenu='submenu';
+		$aksi='tambah';
+		$perekam_id_untuk_button_ajax='';
+		$class='form-control';
+		//$this->form_general_2_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control');
+		//echo "OK BRO SIAP-SIAP";
+		echo "
+			<!--Skrip untuk menampilkan modal saat window onload-->
+			<script type=\"text/javascript\">
+				$(document).ready(function(){
+					let loading_api_balasan = $(\"#pra_api_balasan\");
+					let tampilkan_api_balasan = $(\"#penampil_api_balasan\");
+					tampilkan_api_balasan.hide();
+					loading_api_balasan.fadeIn();
+					";
+					$token=$this->enkripsi->enkapsulasiData('andisinra');
+					echo"
+					$.post(\"".$this->config->item('bank_data')."/index.php/Frontoffice/read_alamat_web_umum/".$token."/Frontoffice/terima_surat_masuk\",{ data:\"okbro\"},
+					function(data,status){
+					loading_api_balasan.fadeOut();
+					tampilkan_api_balasan.html(data);
+					tampilkan_api_balasan.fadeIn(2000);
+					});
+				});
+			</script>
+		";
+
+		echo "
+			<div id='pra_api_balasan' style='width:65%;' align='center' >
+			<div class=\"progress\" style=\"margin-top:50px; height:20px\">
+			<div class=\"progress-bar progress-bar-striped active\" role=\"progressbar\" aria-valuenow=\"90\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width:100%\">
+			mohon tunggu data dari bank data...
+			</div>
+			</div>
+			</div>
+			</center>
+
+			<div id=penampil_api_balasan align=\"center\" style='width:100%;'></div>
+		";
+		$this->form_general_2_vertikal_non_iframe_controller($komponen,$atribut_form,$array_option,$atribut_table,$judul,$tombol,$value_selected_combo,$target_action,$submenu,$aksi,$perekam_id_untuk_button_ajax,$class='form-control',$target_ajax='',$data_ajax=NULL);
+	}
+
+	public function sekretariat_unggahsuratbaru_OLD2()
+	{
+		//$this->header_lengkap_bootstrap_controller();
+		$judul="<span style=\"font-size:20px;font-weight:bold;\">UNGGAH SURAT DAN BERKAS BARU</span>";
+		$tabel="surat_keluar";
+		$coba=array();
+		$id='idsurat_keluar';
+		$aksi='tambah';
+		if (!($aksi=="cari") and !($aksi=="tampil_semua")) $coba=$this->pengisi_komponen_controller($id,$tabel,$aksi);
+		//deskripsi $komponen=array($type 0,$nama_komponen 1,$class 2,$id 3,$atribut 4,$event 5,$label 6,$nilai_awal_atau_nilai_combo 7. $selected 8)
+		$coba=$this->pengisi_awal_combo ($id,$tabel,$coba);
+		//deskripsi combo_database: $type='combo_database',$nama_komponen,$class,$id,$atribut,$kolom,$tabel,$selected
+
+		//reset form sebelum dibuka:
+		foreach($coba as $key=>$k){
+			$coba[$key][7]='';
+		}
+
+		#===========================================
+		$coba[3][0]='combo_database_json_3';
+		$coba[3][3]='ditujukan_ke_bidang_opd';
+		$coba[3][7]=array("bidang","opd",'table_opd'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		
+		$coba[6][0]='combo_database_json_2';
+		$coba[6][3]='sub_bidang_opd_ditujukanke';
+		$coba[6][7]=array("sub_bidang","bidang","opd",'table_opd',NULL,$coba[3][3],"Klik kolom \"Ditujukan Ke\" untuk memunculkan pilihan"); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+		$coba[6][8]='Yang Lain (Others)';
+		#===========================================
+		
+		/*OLD
 		$coba[6][0]='combo_database';
 		$coba[6][7]=array("target","target",'target_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
 		$coba[7][0]='hidden';
 		$coba[7][7]='ASN internal';
-		
+		*/
 		$coba[8][0]='hidden';
 		$coba[8][7]='BADAN KEPEGAWAIAN DAERAH';
 		$coba[9][0]='hidden';
@@ -16014,12 +18608,69 @@ class Frontoffice extends CI_Controller {
 			</style>
 		";
 		echo "<hr>";
+
+		//=======#0002button1======
+      	$base=site_url('Frontoffice/frontoffice_admin');
+      	$alamat=$this->enkripsi->enkapsulasiData($base);
+		$fields = $this->viewfrommyframework->penarik_semua_nama_kolom_sebuah_tabel_view('surat_arsip_frontoffice');
 		echo "
-		<button class=\"btn btn-lg btn-info shadow-sm kotak\" id=\"baca_surat_masuk\"><i class=\"fas fa-envelope-open fa-lg text-white-100\"></i>
-		<span id=\"counter_surat_masuk_masuk_besar\" class=\"badge badge-danger badge-counter\" style=\"margin-left:-15px;top:-10px;\"></span>
-		<br>Baca Surat Terusan <br>[FrontOffice]</button>
-		<button style=\"cursor:pointer;color:white;\" class=\"kotak d-sm-inline-block btn btn-lg btn-success shadow-sm\" id=\"buat_catatan\" ><i class=\"fas fa-file-alt fa-lg text-white-100\"></i><br>Buat Dokumen <br>[MiniOffice]</button>
+		<button class=\"btn btn-lg btn-info shadow-sm kotak\" id=\"arsip_surat_masuk\"><i class=\"fas fa-envelope-open fa-lg text-white-100\"></i>
+		<!--<span id=\"counter_surat_masuk_masuk_besar\" class=\"badge badge-danger badge-counter\" style=\"margin-left:-15px;top:-10px;\"></span>-->
+		<br>Arsip Surat Masuk <br>[FrontOffice]</button>
+		<!--<button style=\"cursor:pointer;color:white;\" class=\"kotak d-sm-inline-block btn btn-lg btn-success shadow-sm\" id=\"buat_catatan\" ><i class=\"fas fa-file-alt fa-lg text-white-100\"></i><br>Buat Dokumen <br>[MiniOffice]</button>-->
+		<!--#0002button0--->
+		<button style=\"cursor:pointer;color:white;\" class=\"kotak d-sm-inline-block btn btn-lg btn-success shadow-sm\" id=\"arsip_surat_balasan\" ><i class=\"fas fa-file-alt fa-lg text-white-100\"></i><br>Arsip Surat Balasan <br>[FrontOffice]</button>
 		<!-- Script untuk pemanggilan ajax -->
+		<script>      
+		  $(document).ready(function(){
+			$('#unggah_frontoffice_langsung').click(function(){
+			  var loading = $('#pra_tabel');
+			  var tampilkan = $('#penampil_tabel');
+			  tampilkan.hide();
+			  loading.fadeIn(); 
+			  $.post('".site_url('/Frontoffice/buka_frontoffice/'.$alamat)."',{ data:'okbro'},
+			  function(data,status){
+				loading.fadeOut();
+				tampilkan.html(data);
+				tampilkan.fadeIn(2000);
+			  });
+			});
+		  });
+		</script> 
+        <script> 
+		$(document).ready(function(){
+			$(\"#arsip_surat_masuk\").click(function(){
+				var loading = $(\"#pra_tabel\");
+				var tampilkan = $(\"#penampil_tabel\");
+				tampilkan.hide();
+				loading.fadeIn();
+				//$.post('".site_url("/Frontoffice/tampilkan_tabel_cruid_new_with_open/tampilkan_tabel_terusan_new_verifikasi/".$fields[0]."/desc")."',{ data:\"okbro\"}, 
+				$.post('".site_url("/Frontoffice/tampilkan_tabel_cruid_new_with_open/surat_arsip_frontoffice/".$fields[0]."/desc")."',{ data:\"okbro\"}, 
+				function(data,status){
+				loading.fadeOut();
+				tampilkan.html(data);
+				tampilkan.fadeIn(2000);
+				});
+			});
+		});
+		</script>
+		<script> 
+		$(document).ready(function(){
+			$(\"#arsip_surat_balasan\").click(function(){
+				var loading = $(\"#pra_tabel\");
+				var tampilkan = $(\"#penampil_tabel\");
+				tampilkan.hide();
+				loading.fadeIn();
+				$.post('".site_url("/Frontoffice/tampilkan_tabel_balasan_frontoffice_verifikasi")."',{ data:\"okbro\"}, 
+				function(data,status){
+				loading.fadeOut();
+				tampilkan.html(data);
+				tampilkan.fadeIn(2000);
+				});
+			});
+		});
+		</script>
+        
 		<script>      
 		$(document).ready(function(){
 			//xcxc
@@ -17391,7 +20042,7 @@ class Frontoffice extends CI_Controller {
 		*/
 	}
 
-	public function frontoffice_admin(){ //xx1
+	public function frontoffice_admin_old_26_11_2020(){ //xx1
 		$user = $this->session->userdata('user_bankdata');
         $str = $user['email'].$user['username']."1@@@@@!andisinra";
         $str = hash("sha256", $str );
@@ -17399,6 +20050,49 @@ class Frontoffice extends CI_Controller {
 		
 		if(($user!==FALSE)&&($str==$hash)){
 			$this->load->view('admin_frontoffice/dashboard');
+		}else {
+			$this->session->set_userdata('percobaan_login','gagal');
+			//redirect( site_url('login/login') );
+			$this->load->view("loginpage");
+		}
+	}
+
+	public function frontoffice_admin($penerima=NULL,$penanda_untuk_log=NULL,$gagal=NULL,$data_kiriman_enkrip=NULL,$date_note_enkrip=NULL){
+		$user = $this->session->userdata('user_bankdata');
+        $str = $user['email'].$user['username']."1@@@@@!andisinra";
+        $str = hash("sha256", $str );
+        $hash=$this->session->userdata('hash');
+		
+		if(($user!=FALSE)&&($str==$hash)){
+			$flip_flop = $this->session->userdata('flag0002');
+			
+			if($penerima=='sukses_balasan_surat_frontoffice'){
+				alert('Surat balasan sukses di kirim');
+				$this->session->set_userdata('modal','perlihatkan');
+			}
+			if($penerima=='gagal_balasan_surat_frontoffice'){
+				alert('Surat balasan gagal terkirim, karena data yang dikirim kosong');
+				$this->session->set_userdata('modal','perlihatkan');
+			}
+
+			if(($penanda_untuk_log=='lakukan_log')&&($penerima!='')&&($gagal!='gagal')&&($flip_flop=='ok_go_ahead')){
+				$data['kiriman_enkrip']=$penerima;
+				$data['data_kiriman_enkrip_f']=$data_kiriman_enkrip;
+				$data['date_note_enkrip_f']=$date_note_enkrip;
+				$data['src']="Frontoffice/pdf/".$data_kiriman_enkrip."/".$date_note_enkrip;
+				//alert('masuk sini 1');
+				//alert($penerima);
+				$this->load->view('admin_frontoffice/dashboard',$data);
+			}else if(($gagal=='gagal')&&($flip_flop=='ok_go_ahead')){
+				$data['gagal']='gagal';
+				//alert('masuk sini 2');
+				$this->load->view('admin_frontoffice/dashboard',$data);
+			}else{
+				//alert('masuk sini 3');
+				$this->load->view('admin_frontoffice/dashboard');
+			}
+
+			//$this->load->view('admin_frontoffice/dashboard');
 		}else {
 			$this->session->set_userdata('percobaan_login','gagal');
 			//redirect( site_url('login/login') );
